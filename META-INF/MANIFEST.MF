@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: IdealVSP_oceanos
+Bundle-SymbolicName: IdealVSP_oceanos;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: ru.idealplm.vsp.oceanos.handlers.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ com.teamcenter.rac.kernel;bundle-version="10000.1.0",
+ com.teamcenter.rac.aifrcp;bundle-version="10000.1.0",
+ com.teamcenter.rac.pse;bundle-version="10000.1.0",
+ ru.idealplm.xml2pdf2;bundle-version="3.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
