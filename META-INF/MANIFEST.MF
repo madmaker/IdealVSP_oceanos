@@ -11,6 +11,9 @@ Require-Bundle: org.eclipse.ui,
  com.teamcenter.rac.pse;bundle-version="10000.1.0",
  ru.idealplm.xml2pdf2;bundle-version="3.0.0",
  TcSoaCadRac;bundle-version="10000.1.0",
- com.teamcenter.rac.util;bundle-version="10000.1.0"
+ com.teamcenter.rac.util;bundle-version="10000.1.0",
+ TcSoaCoreRac;bundle-version="10000.1.0",
+ TcSoaCommon;bundle-version="10000.1.0",
+ TcSoaCoreTypes;bundle-version="10000.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

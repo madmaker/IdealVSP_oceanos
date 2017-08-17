@@ -1,13 +1,15 @@
-package ru.idealplm.vsp.oceanos.core;
+package ru.idealplm.vsp.oceanos.xml;
 
 import java.io.InputStream;
 
-public class PDFBuilderConfiguration extends ReportConfiguration
+import ru.idealplm.vsp.oceanos.core.ReportConfiguration;
+
+public class PDFReportBuilderConfiguration extends ReportConfiguration
 {
 	private InputStream templateStream;
 	private InputStream configStream;
 
-	public PDFBuilderConfiguration(InputStream templateStream, InputStream configStream)
+	public PDFReportBuilderConfiguration(InputStream templateStream, InputStream configStream)
 	{
 		setTemplateStream(templateStream);
 		setConfigStream(configStream);
@@ -44,12 +46,12 @@ public class PDFBuilderConfiguration extends ReportConfiguration
 	public InputStream getDefaultTemplateStream()
 	{
 		System.err.println("Using default template file.");
-		return PDFBuilderConfiguration.class.getResourceAsStream("/pdf/DefaultSpecPDFTemplate.xsl");
+		return PDFReportBuilderConfiguration.class.getResourceAsStream("/pdf/DefaultSpecPDFTemplate.xsl");
 	}
 
 	public InputStream getDefaultConfigStream()
 	{
 		System.err.println("Using default config file.");
-		return PDFBuilderConfiguration.class.getResourceAsStream("/pdf/DefaultSpecPDFUserconfig.xml");
+		return PDFReportBuilderConfiguration.class.getResourceAsStream("/pdf/DefaultSpecPDFUserconfig.xml");
 	}
 }

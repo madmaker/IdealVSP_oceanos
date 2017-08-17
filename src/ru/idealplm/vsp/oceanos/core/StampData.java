@@ -1,5 +1,10 @@
 package ru.idealplm.vsp.oceanos.core;
 
+import com.teamcenter.rac.kernel.TCComponent;
+import com.teamcenter.rac.kernel.TCException;
+
+import ru.idealplm.vsp.oceanos.util.DateUtil;
+
 public class StampData
 {
 	public String	name = "";
@@ -19,4 +24,16 @@ public class StampData
 	public String	techCheckDate = "";
 	public String	normCheck = "";
 	public String	normCheckDate = "";
+	
+	public void print()
+	{
+		System.out.println("--==--");
+		System.out.println(name);
+		System.out.println(id);
+		System.out.println(design);
+		System.out.println(designDate);
+		System.out.println(check);
+		System.out.println(checkDate);
+		System.out.println("--==--");
+	}
 }

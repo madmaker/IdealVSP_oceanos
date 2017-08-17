@@ -6,6 +6,8 @@ public class VSPSettings
 	public static boolean isCancelled;
 	public static boolean doShowAdditionalForm;
 	
+	public static String[] nonbreakableWords;
+	
 	static
 	{
 		reset();
@@ -16,5 +18,7 @@ public class VSPSettings
 		isOKPressed = false;
 		isCancelled = false;
 		doShowAdditionalForm = false;
+		if(nonbreakableWords!=null && nonbreakableWords.length > 0)
+			nonbreakableWords = new String[]{};
 	}
 }

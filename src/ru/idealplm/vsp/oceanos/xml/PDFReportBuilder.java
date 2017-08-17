@@ -1,21 +1,24 @@
-package ru.idealplm.vsp.oceanos.core;
+package ru.idealplm.vsp.oceanos.xml;
 
 import java.io.File;
 import java.io.IOException;
 
+import ru.idealplm.vsp.oceanos.core.Error;
+import ru.idealplm.vsp.oceanos.core.Report;
+import ru.idealplm.vsp.oceanos.core.VSP;
 import ru.idealplm.vsp.oceanos.util.FileUtil;
 import ru.idealplm.xml2pdf2.handlers.PDFBuilder;
 
-public class OceanosReportBuilder
+public class PDFReportBuilder
 {
 	private PDFBuilder pdfBuilder;
-	private PDFBuilderConfiguration pdfConfiguration;
+	private PDFReportBuilderConfiguration pdfConfiguration;
 	private Report report;
 	
-	public OceanosReportBuilder(Report report)
+	public PDFReportBuilder(Report report)
 	{
 		this.report = report;
-		this.pdfConfiguration = (PDFBuilderConfiguration)report.configuration;
+		this.pdfConfiguration = (PDFReportBuilderConfiguration)report.configuration;
 	}
 	
 	public void buildReport()
@@ -23,7 +26,7 @@ public class OceanosReportBuilder
 		report.isDataValid();
 		try
 		{
-			FileUtil.copy(OceanosReportBuilder.class.getResourceAsStream("/icons/iconOceanos.jpg"),
+			FileUtil.copy(PDFReportBuilder.class.getResourceAsStream("/icons/iconOceanos.jpg"),
 					new File(report.data.getParentFile().getAbsolutePath() + "\\iconOceanos.jpg"));
 		}
 		catch (IOException e)
@@ -58,13 +61,13 @@ public class OceanosReportBuilder
 		report.isDataValid();
 		try
 		{
-			FileUtil.copy(OceanosReportBuilder.class.getResourceAsStream("/icons/iconOceanos.jpg"),
+			FileUtil.copy(PDFReportBuilder.class.getResourceAsStream("/icons/iconOceanos.jpg"),
 					new File(report.data.getParentFile().getAbsolutePath() + "\\iconOceanos.jpg"));
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		report.report = PDFBuilder.xml2pdf(report.data, ((PDFBuilderConfiguration)report.configuration).getTemplateStream(), ((PDFBuilderConfiguration)report.configuration).getConfigStream());
+		report.report = PDFBuilder.xml2pdf(report.data, ((PDFReportBuilderConfiguration)report.configuration).getTemplateStream(), ((PDFReportBuilderConfiguration)report.configuration).getConfigStream());
 	}
 }

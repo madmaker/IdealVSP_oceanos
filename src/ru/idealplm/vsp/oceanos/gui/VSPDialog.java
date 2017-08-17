@@ -19,6 +19,7 @@ import com.teamcenter.rac.util.DateButton;
 
 import ru.idealplm.vsp.oceanos.core.VSP;
 import ru.idealplm.vsp.oceanos.core.VSPSettings;
+import ru.idealplm.vsp.oceanos.util.DateUtil;
 
 public class VSPDialog extends Dialog
 {
@@ -30,6 +31,7 @@ public class VSPDialog extends Dialog
 	private Composite compositeMain;
 	private Composite compositeSignatures;
 	
+	private Text text_PrimaryApp;
 	private Text text_Litera1;
 	private Text text_Litera2;
 	private Text text_Litera3;
@@ -174,23 +176,26 @@ public class VSPDialog extends Dialog
 		button_ShowAdditionalForm.setBounds(10, 320, 225, 16);
 		button_ShowAdditionalForm.setText("Показать дополнительную форму");
 		
-		Label label_litera_1 = new Label(compositeMain, SWT.NONE);
-		label_litera_1.setText("\u041B\u0438\u0442\u0435\u0440\u0430 1");
-		label_litera_1.setBounds(10, 460, 76, 13);
+		text_PrimaryApp = new Text(compositeMain, SWT.BORDER);
+		text_PrimaryApp.setBounds(10, 437, 154, 19);
+		
+		Label label_Litera1 = new Label(compositeMain, SWT.NONE);
+		label_Litera1.setText("\u041B\u0438\u0442\u0435\u0440\u0430 1");
+		label_Litera1.setBounds(10, 460, 76, 13);
 		
 		text_Litera1 = new Text(compositeMain, SWT.BORDER);
 		text_Litera1.setBounds(10, 477, 76, 19);
 		
-		Label label_litera_2 = new Label(compositeMain, SWT.NONE);
-		label_litera_2.setText("\u041B\u0438\u0442\u0435\u0440\u0430 2");
-		label_litera_2.setBounds(96, 460, 76, 13);
+		Label label_Litera2 = new Label(compositeMain, SWT.NONE);
+		label_Litera2.setText("\u041B\u0438\u0442\u0435\u0440\u0430 2");
+		label_Litera2.setBounds(96, 460, 76, 13);
 		
 		text_Litera2 = new Text(compositeMain, SWT.BORDER);
 		text_Litera2.setBounds(96, 477, 76, 19);
 		
-		Label label_litera_3 = new Label(compositeMain, SWT.NONE);
-		label_litera_3.setText("\u041B\u0438\u0442\u0435\u0440\u0430 3");
-		label_litera_3.setBounds(182, 460, 76, 13);
+		Label label_Litera3 = new Label(compositeMain, SWT.NONE);
+		label_Litera3.setText("\u041B\u0438\u0442\u0435\u0440\u0430 3");
+		label_Litera3.setBounds(182, 460, 76, 13);
 		
 		text_Litera3 = new Text(compositeMain, SWT.BORDER);
 		text_Litera3.setBounds(182, 477, 76, 19);
@@ -205,6 +210,7 @@ public class VSPDialog extends Dialog
 				vsp.stampData.litera1 = text_Litera1.getText();
 				vsp.stampData.litera2 = text_Litera2.getText();
 				vsp.stampData.litera3 = text_Litera3.getText();
+				vsp.stampData.pervPrim = text_PrimaryApp.getText();
 				
 				vsp.stampData.design = textDesigner.getText();
 				vsp.stampData.check = textCheck.getText();
@@ -212,11 +218,11 @@ public class VSPDialog extends Dialog
 				vsp.stampData.normCheck = textNCheck.getText();
 				vsp.stampData.approve = textApprover.getText();
 				
-				vsp.stampData.designDate = dateDesigner.getText().equals("Дата не установлена.")?null:fixData(dateDesigner.getText());
-				vsp.stampData.checkDate = dateDesigner.getText().equals("Дата не установлена.")?null:fixData(dateCheck.getText());
-				vsp.stampData.techCheckDate = dateDesigner.getText().equals("Дата не установлена.")?null:fixData(dateTCheck.getText());
-				vsp.stampData.normCheckDate = dateDesigner.getText().equals("Дата не установлена.")?null:fixData(dateNCheck.getText());
-				vsp.stampData.approveDate = dateDesigner.getText().equals("Дата не установлена.")?null:fixData(dateApprover.getText());
+				vsp.stampData.designDate = dateDesigner.getText().equals("Дата не установлена.")?"":fixData(dateDesigner.getText());
+				vsp.stampData.checkDate = dateCheck.getText().equals("Дата не установлена.")?"":fixData(dateCheck.getText());
+				vsp.stampData.techCheckDate = dateTCheck.getText().equals("Дата не установлена.")?"":fixData(dateTCheck.getText());
+				vsp.stampData.normCheckDate = dateNCheck.getText().equals("Дата не установлена.")?"":fixData(dateNCheck.getText());
+				vsp.stampData.approveDate = dateApprover.getText().equals("Дата не установлена.")?"":fixData(dateApprover.getText());
 				
 				shell.dispose();
 				System.out.println("OK!");
@@ -239,13 +245,39 @@ public class VSPDialog extends Dialog
 	
 	private void fillContents()
 	{
+		text_Litera1.setText(vsp.stampData.litera1);
+		text_Litera2.setText(vsp.stampData.litera2);
+		text_Litera3.setText(vsp.stampData.litera3);
+		text_PrimaryApp.setText(vsp.stampData.pervPrim);
+		
+		textDesigner.setText(vsp.stampData.design);
+		textCheck.setText(vsp.stampData.check);
+		textTCheck.setText(vsp.stampData.techCheck);
+		textNCheck.setText(vsp.stampData.normCheck);
+		textApprover.setText(vsp.stampData.approve);
+
+		//TODO okeanos
+		String s_DesignDate = vsp.stampData.designDate;
+		String s_CheckDate = vsp.stampData.checkDate;
+		String s_TCheckDate = vsp.stampData.techCheckDate;
+		String s_NCheckDate = vsp.stampData.normCheckDate;
+		String s_ApproveDate = vsp.stampData.approveDate;
+		System.out.println("::DATE::"+s_DesignDate);
+		if(!s_DesignDate.isEmpty()) { dateDesigner.setDate(DateUtil.getDateFormSimpleString(s_DesignDate)); }else{ dateDesigner.setDate(""); }
+		if(!s_CheckDate.isEmpty()) { dateCheck.setDate(DateUtil.getDateFormSimpleString(s_CheckDate)); }else{ dateCheck.setDate(""); }
+		if(!s_TCheckDate.isEmpty()) { dateTCheck.setDate(DateUtil.getDateFormSimpleString(s_TCheckDate)); }else{ dateTCheck.setDate(""); }
+		if(!s_NCheckDate.isEmpty()) { dateNCheck.setDate(DateUtil.getDateFormSimpleString(s_NCheckDate)); }else{ dateNCheck.setDate(""); }
+		if(!s_ApproveDate.isEmpty()) { dateApprover.setDate(DateUtil.getDateFormSimpleString(s_ApproveDate)); }else{ dateApprover.setDate(""); }
 		
 	}
 	
 	private String fixData(String input){
+		System.out.println("DATE" + "{" + input + "}");
 		String output = input;
-		if(input.substring(0, input.indexOf("-")).length()<2){
-			output = "0"+output;
+		if(input.contains("-")){
+			if(input.substring(0, input.indexOf("-")).length()<2){
+				output = "0"+output;
+			}
 		}
 		return output;
 	}

@@ -32,17 +32,15 @@ public class VSPHandler extends AbstractHandler
 		vsp = new VSP();
 		vsp.progressMonitor = pd;
 		vsp.init();
+		vsp.readExistingData();
 
 		VSPDialog mainDialog = new VSPDialog(HandlerUtil.getActiveShell(event).getShell(), SWT.CLOSE, vsp);
-		
-
 		mainDialog.open();
 		
 		if (!VSPSettings.isOKPressed) { return null; }
 		
 		
 		vsp.readData();
-		vsp.buildXmlFile();
 		vsp.buildReportFile();
 		vsp.uploadReportFile();
 		

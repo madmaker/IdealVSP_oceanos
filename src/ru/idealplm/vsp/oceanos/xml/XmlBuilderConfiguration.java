@@ -2,7 +2,7 @@ package ru.idealplm.vsp.oceanos.xml;
 
 import java.util.HashMap;
 
-import ru.idealplm.vsp.oceanos.core.VSP.FormField;
+import ru.idealplm.vsp.oceanos.core.Report.FormField;
 
 public class XmlBuilderConfiguration
 {

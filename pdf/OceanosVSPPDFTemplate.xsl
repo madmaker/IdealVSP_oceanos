@@ -603,7 +603,9 @@
 	<xsl:param name="AddChecker"/>
     <xsl:param name="Dokum"/>
     <xsl:param name="UdList"/>
-	<xsl:param name="Litera"/>
+	<xsl:param name="Litera1"/>
+	<xsl:param name="Litera2"/>
+	<xsl:param name="Litera3"/>
 	<xsl:param name="Zavod"/>
 	
 	<xsl:param name="crtDate"/>
@@ -697,9 +699,9 @@
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block text-align="center" font-style="italic" font-size="2.5mm"><xsl:value-of select="$chkDate"/></fo:block></fo:table-cell>
                   <!-- Spanned cells number-rows-spanned="5" -->
-                  <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block font-style="italic"><xsl:value-of select="$Litera"/></fo:block></fo:table-cell>
-                  <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
-                  <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
+                  <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block font-style="italic" text-align="center"><xsl:value-of select="$Litera1"/></fo:block></fo:table-cell>
+				  <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block font-style="italic" text-align="center"><xsl:value-of select="$Litera2"/></fo:block></fo:table-cell>
+				  <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block font-style="italic" text-align="center"><xsl:value-of select="$Litera3"/></fo:block></fo:table-cell>
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block text-align="center" font-style="italic"><fo:page-number/></fo:block></fo:table-cell>
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block text-align="center" font-style="italic"><fo:page-number-citation ref-id="LastPage"/></fo:block></fo:table-cell>
                 </fo:table-row>
