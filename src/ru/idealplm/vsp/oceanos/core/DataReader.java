@@ -1,6 +1,7 @@
 package ru.idealplm.vsp.oceanos.core;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.concurrent.CancellationException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,14 +38,16 @@ public class DataReader
 	private String blPropertyValues[];
 	private TCComponent document;
 	private ReportLineOccurence emptyOccurence;
+	private ArrayList<TCComponentBOMLine> readBomLines;
 	
 	public DataReader(VSP vsp)
 	{
 		this.vsp = vsp;
-		this.stampData = vsp.stampData;
+		this.stampData = vsp.report.stampData;
 		pd = vsp.progressMonitor;
 		lineList = vsp.report.linesList;
 		emptyOccurence = new ReportLineOccurence(null, null);
+		readBomLines = new ArrayList<TCComponentBOMLine>();
 	}
 	
 	public void readExistingData()
@@ -63,7 +66,8 @@ public class DataReader
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
 					monitor.beginTask("Чтение данных", 100);
-					readBomData(VSP.topBOMLine, emptyOccurence, monitor);
+					ReportLineOccurence currentOccurence = readBomLineData(VSP.topBOMLine, emptyOccurence);
+					readBomData(VSP.topBOMLine, currentOccurence, emptyOccurence, monitor);
 					monitor.done();
 				}
 			});
@@ -79,10 +83,12 @@ public class DataReader
 		}
 	}
 	
-	private void readBomData(TCComponentBOMLine bomLine, ReportLineOccurence parentOccurence, IProgressMonitor monitor)
+	private void readBomData(TCComponentBOMLine bomLine, ReportLineOccurence currentOccurence, ReportLineOccurence parentOccurence, IProgressMonitor monitor)
 	{
 		ReportLineOccurence tempOccurence;
-		ReportLineOccurence currentOccurence = readBomLineData(bomLine, parentOccurence);
+		//if(readBomLines.contains(bomLine)) return;
+		//ReportLineOccurence currentOccurence = readBomLineData(bomLine, parentOccurence);
+		if(currentOccurence==null) return;
 		ExpandPSOneLevelInfo levelInfo = new ExpandPSOneLevelInfo();
 		ExpandPSOneLevelPref levelPref = new ExpandPSOneLevelPref();
 
@@ -99,25 +105,17 @@ public class DataReader
 				for (ExpandPSData psData : levelOut.children)
 				{
 					tempOccurence = readBomLineData(psData.bomLine, currentOccurence);
+					readBomLines.add(psData.bomLine);
 					if(tempOccurence!=null)
 						currentOccurence.addChildOccurence(tempOccurence);
-					//if(currentOccurence!=null && currentOccurence.reportLine.type!=ReportLineType.DOCUMENT) readBomLineData(psData.bomLine, currentOccurence);
 					checkIfMonitorIsCancelled(monitor);
 				}
 			}
 			for(ReportLineOccurence child : currentOccurence.children)
 			{
-				readBomData(child.bomLine, child, monitor);
+				readBomData(child.bomLine, child, currentOccurence, monitor);
 				checkIfMonitorIsCancelled(monitor);
 			}
-			/*for (ExpandPSOneLevelOutput levelOut : levelResp.output)
-			{
-				for (ExpandPSData psData : levelOut.children)
-				{
-					if(currentOccurence!=null && currentOccurence.reportLine.type!=ReportLineType.DOCUMENT) readBomData(psData.bomLine, currentOccurence, monitor);
-					checkIfMonitorIsCancelled(monitor);
-				}
-			}*/
 		}
 	}
 	
@@ -127,11 +125,10 @@ public class DataReader
 		try
 		{
 			blPropertyValues = bomLine.getProperties(blPropertyNames);
-			System.out.println("Reading bom line data for " + blPropertyValues[3]);
 			boolean hasValidType = hasValidType(blPropertyValues[0], blPropertyValues[1]);
 			if(hasValidType)
 			{
-				System.out.println("IS valid");
+				printBOMLineInfo(bomLine);
 				resultOccurence = processLine(bomLine, parentOccurence);
 			}
 		} catch (TCException ex)
@@ -145,9 +142,9 @@ public class DataReader
 	{
 		ReportLineOccurence resultOccurence = null;
 		try{
-			System.out.println("-Looking for a document");
 			document = getRelatedDocument(bomLine.getItemRevision());
 			if(document!=null){
+				System.out.println("processing doc="+document.getUid());
 				if(lineList.containsLineWithUid(document.getUid())){
 					updateExistingLine(bomLine, parentOccurence);
 				} else {
@@ -164,21 +161,16 @@ public class DataReader
 	{
 		ReportLineOccurence resultOccurence = null;
 		try{
-			System.out.println("--New line for " + document.getProperty("object_name"));
 			int quantity = blPropertyValues[2].trim().isEmpty()?1:Integer.parseInt(blPropertyValues[2]);
 			ReportLine line = new ReportLine(getTypeOfLine(), document.getProperty("object_name"));
 			line.uid = document.getUid();
 			line.id = document.getProperty("item_id");
-			System.out.println("--new occurence");
-			System.out.println(parentOccurence==null);
 			resultOccurence = new ReportLineOccurence(line, parentOccurence);
 			resultOccurence.quantity = quantity;
-			resultOccurence.quantityMult = parentOccurence.getTotalQuantity();
+			resultOccurence.quantityMult = parentOccurence.calcTotalQuantity().getTotalQuantity();
 			resultOccurence.bomLine = bomLine;
 			resultOccurence.remark = blPropertyValues[4];
-			System.out.println("--add occurence");
 			line.occurences.add(resultOccurence);
-			System.out.println("--add line");
 			lineList.addLine(line);
 		} catch (Exception ex) 
 		{
@@ -190,12 +182,11 @@ public class DataReader
 	public void updateExistingLine(TCComponentBOMLine bomLine, ReportLineOccurence parentOccurence)
 	{
 		ReportLineOccurence resultOccurence = null;
-		System.out.println("--Existing line");
 		int quantity = blPropertyValues[2].trim().isEmpty()?1:Integer.parseInt(blPropertyValues[2]);
 		ReportLine line = lineList.getLine(document.getUid());
 		resultOccurence = new ReportLineOccurence(line, parentOccurence);
 		resultOccurence.quantity = quantity;
-		resultOccurence.quantityMult = parentOccurence.getTotalQuantity();
+		resultOccurence.quantityMult = parentOccurence.calcTotalQuantity().getTotalQuantity();
 		resultOccurence.bomLine = bomLine;
 		resultOccurence.remark = blPropertyValues[4];
 		line.occurences.add(resultOccurence);
@@ -240,7 +231,6 @@ public class DataReader
 			for(int i = 0; i < values.length; i++) {
 				stringBuilder.append(values[i] + "   ");
 			}
-			System.out.println(stringBuilder.toString());
 		} catch (TCException ex) {
 			ex.printStackTrace();
 		}

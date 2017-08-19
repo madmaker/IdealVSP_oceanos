@@ -38,7 +38,6 @@ public class VSP
 	public static ErrorList errorList;
 
 	public ProgressMonitorDialog progressMonitor;
-	public StampData stampData;
 	public Report report;
 	private DataReader dataReader;
 	
@@ -46,7 +45,6 @@ public class VSP
 	
 	public VSP()
 	{
-		stampData = new StampData();
 		report = new Report();
 		errorList = new ErrorList();
 		report.type = ReportType.PDF;
@@ -85,7 +83,7 @@ public class VSP
 		XmlBuilderConfiguration A4xmlBuilderConfiguration = new XmlBuilderConfiguration(26, 32);
 		A4xmlBuilderConfiguration.MaxWidthGlobalRemark = 474;
 
-		XmlBuilder xmlBuilder = new XmlBuilder(A4xmlBuilderConfiguration, this);
+		XmlBuilder xmlBuilder = new XmlBuilder(A4xmlBuilderConfiguration, report);
 		File data = xmlBuilder.buildXml();
 
 		report.data = data;

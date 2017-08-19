@@ -72,7 +72,7 @@ public class VSPDialog extends Dialog
 	private void createContents()
 	{
 		shell = new Shell();
-		shell.setSize(470, 605);
+		shell.setSize(470, 349);
 		shell.setText("\u0421\u043F\u0435\u0446\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u044F");
 		tabFolder = new TabFolder(shell, SWT.NONE);
 		tabMain = new TabItem(tabFolder, SWT.BORDER);
@@ -173,32 +173,32 @@ public class VSPDialog extends Dialog
 	    tabSignatures.setText("\u041F\u043E\u0434\u043F\u0438\u0441\u0430\u043D\u0442\u044B");
 
 	    final Button button_ShowAdditionalForm = new Button(compositeMain, SWT.CHECK);
-		button_ShowAdditionalForm.setBounds(10, 320, 225, 16);
+		button_ShowAdditionalForm.setBounds(10, 10, 225, 16);
 		button_ShowAdditionalForm.setText("Показать дополнительную форму");
 		
 		text_PrimaryApp = new Text(compositeMain, SWT.BORDER);
-		text_PrimaryApp.setBounds(10, 437, 154, 19);
+		text_PrimaryApp.setBounds(10, 66, 154, 19);
 		
 		Label label_Litera1 = new Label(compositeMain, SWT.NONE);
 		label_Litera1.setText("\u041B\u0438\u0442\u0435\u0440\u0430 1");
-		label_Litera1.setBounds(10, 460, 76, 13);
+		label_Litera1.setBounds(10, 91, 76, 13);
 		
 		text_Litera1 = new Text(compositeMain, SWT.BORDER);
-		text_Litera1.setBounds(10, 477, 76, 19);
+		text_Litera1.setBounds(10, 110, 76, 19);
 		
 		Label label_Litera2 = new Label(compositeMain, SWT.NONE);
 		label_Litera2.setText("\u041B\u0438\u0442\u0435\u0440\u0430 2");
-		label_Litera2.setBounds(96, 460, 76, 13);
+		label_Litera2.setBounds(92, 91, 76, 13);
 		
 		text_Litera2 = new Text(compositeMain, SWT.BORDER);
-		text_Litera2.setBounds(96, 477, 76, 19);
+		text_Litera2.setBounds(92, 110, 76, 19);
 		
 		Label label_Litera3 = new Label(compositeMain, SWT.NONE);
 		label_Litera3.setText("\u041B\u0438\u0442\u0435\u0440\u0430 3");
-		label_Litera3.setBounds(182, 460, 76, 13);
+		label_Litera3.setBounds(174, 91, 76, 13);
 		
 		text_Litera3 = new Text(compositeMain, SWT.BORDER);
-		text_Litera3.setBounds(182, 477, 76, 19);
+		text_Litera3.setBounds(174, 110, 76, 19);
 	    
 		Button btnOk = new Button(compositeMain, SWT.NONE);
 		btnOk.addSelectionListener(new SelectionAdapter() {
@@ -207,29 +207,29 @@ public class VSPDialog extends Dialog
 				VSPSettings.isOKPressed = true;
 				VSPSettings.doShowAdditionalForm = button_ShowAdditionalForm.getSelection();
 				
-				vsp.stampData.litera1 = text_Litera1.getText();
-				vsp.stampData.litera2 = text_Litera2.getText();
-				vsp.stampData.litera3 = text_Litera3.getText();
-				vsp.stampData.pervPrim = text_PrimaryApp.getText();
+				vsp.report.stampData.litera1 = text_Litera1.getText();
+				vsp.report.stampData.litera2 = text_Litera2.getText();
+				vsp.report.stampData.litera3 = text_Litera3.getText();
+				vsp.report.stampData.pervPrim = text_PrimaryApp.getText();
 				
-				vsp.stampData.design = textDesigner.getText();
-				vsp.stampData.check = textCheck.getText();
-				vsp.stampData.techCheck = textTCheck.getText();
-				vsp.stampData.normCheck = textNCheck.getText();
-				vsp.stampData.approve = textApprover.getText();
+				vsp.report.stampData.design = textDesigner.getText();
+				vsp.report.stampData.check = textCheck.getText();
+				vsp.report.stampData.techCheck = textTCheck.getText();
+				vsp.report.stampData.normCheck = textNCheck.getText();
+				vsp.report.stampData.approve = textApprover.getText();
 				
-				vsp.stampData.designDate = dateDesigner.getText().equals("Дата не установлена.")?"":fixData(dateDesigner.getText());
-				vsp.stampData.checkDate = dateCheck.getText().equals("Дата не установлена.")?"":fixData(dateCheck.getText());
-				vsp.stampData.techCheckDate = dateTCheck.getText().equals("Дата не установлена.")?"":fixData(dateTCheck.getText());
-				vsp.stampData.normCheckDate = dateNCheck.getText().equals("Дата не установлена.")?"":fixData(dateNCheck.getText());
-				vsp.stampData.approveDate = dateApprover.getText().equals("Дата не установлена.")?"":fixData(dateApprover.getText());
+				vsp.report.stampData.designDate = dateDesigner.getText().equals("Дата не установлена.")?"":fixData(dateDesigner.getText());
+				vsp.report.stampData.checkDate = dateCheck.getText().equals("Дата не установлена.")?"":fixData(dateCheck.getText());
+				vsp.report.stampData.techCheckDate = dateTCheck.getText().equals("Дата не установлена.")?"":fixData(dateTCheck.getText());
+				vsp.report.stampData.normCheckDate = dateNCheck.getText().equals("Дата не установлена.")?"":fixData(dateNCheck.getText());
+				vsp.report.stampData.approveDate = dateApprover.getText().equals("Дата не установлена.")?"":fixData(dateApprover.getText());
 				
 				shell.dispose();
 				System.out.println("OK!");
 			}
 		});
 		
-		btnOk.setBounds(139, 512, 68, 23);
+		btnOk.setBounds(137, 263, 68, 23);
 		btnOk.setText("OK");
 		
 		Button btnCancel = new Button(compositeMain, SWT.NONE);
@@ -240,28 +240,28 @@ public class VSPDialog extends Dialog
 			}
 		});
 		btnCancel.setText("Cancel");
-		btnCancel.setBounds(229, 512, 68, 23);
+		btnCancel.setBounds(226, 263, 68, 23);
 	}
 	
 	private void fillContents()
 	{
-		text_Litera1.setText(vsp.stampData.litera1);
-		text_Litera2.setText(vsp.stampData.litera2);
-		text_Litera3.setText(vsp.stampData.litera3);
-		text_PrimaryApp.setText(vsp.stampData.pervPrim);
+		text_Litera1.setText(vsp.report.stampData.litera1);
+		text_Litera2.setText(vsp.report.stampData.litera2);
+		text_Litera3.setText(vsp.report.stampData.litera3);
+		text_PrimaryApp.setText(vsp.report.stampData.pervPrim);
 		
-		textDesigner.setText(vsp.stampData.design);
-		textCheck.setText(vsp.stampData.check);
-		textTCheck.setText(vsp.stampData.techCheck);
-		textNCheck.setText(vsp.stampData.normCheck);
-		textApprover.setText(vsp.stampData.approve);
+		textDesigner.setText(vsp.report.stampData.design);
+		textCheck.setText(vsp.report.stampData.check);
+		textTCheck.setText(vsp.report.stampData.techCheck);
+		textNCheck.setText(vsp.report.stampData.normCheck);
+		textApprover.setText(vsp.report.stampData.approve);
 
 		//TODO okeanos
-		String s_DesignDate = vsp.stampData.designDate;
-		String s_CheckDate = vsp.stampData.checkDate;
-		String s_TCheckDate = vsp.stampData.techCheckDate;
-		String s_NCheckDate = vsp.stampData.normCheckDate;
-		String s_ApproveDate = vsp.stampData.approveDate;
+		String s_DesignDate = vsp.report.stampData.designDate;
+		String s_CheckDate = vsp.report.stampData.checkDate;
+		String s_TCheckDate = vsp.report.stampData.techCheckDate;
+		String s_NCheckDate = vsp.report.stampData.normCheckDate;
+		String s_ApproveDate = vsp.report.stampData.approveDate;
 		System.out.println("::DATE::"+s_DesignDate);
 		if(!s_DesignDate.isEmpty()) { dateDesigner.setDate(DateUtil.getDateFormSimpleString(s_DesignDate)); }else{ dateDesigner.setDate(""); }
 		if(!s_CheckDate.isEmpty()) { dateCheck.setDate(DateUtil.getDateFormSimpleString(s_CheckDate)); }else{ dateCheck.setDate(""); }

@@ -6,7 +6,7 @@ public class VSPSettings
 	public static boolean isCancelled;
 	public static boolean doShowAdditionalForm;
 	
-	public static String[] nonbreakableWords;
+	public static String[] nonbreakableWords = new String[]{};
 	
 	static
 	{

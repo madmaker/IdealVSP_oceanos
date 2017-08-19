@@ -1,10 +1,5 @@
 package ru.idealplm.vsp.oceanos.core;
 
-import com.teamcenter.rac.kernel.TCComponent;
-import com.teamcenter.rac.kernel.TCException;
-
-import ru.idealplm.vsp.oceanos.util.DateUtil;
-
 public class StampData
 {
 	public String	name = "";

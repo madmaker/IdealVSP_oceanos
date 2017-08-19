@@ -2,7 +2,6 @@ package ru.idealplm.vsp.oceanos.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,7 +18,6 @@ import org.w3c.dom.Element;
 
 import ru.idealplm.vsp.oceanos.core.Report;
 import ru.idealplm.vsp.oceanos.core.Report.FormField;
-import ru.idealplm.vsp.oceanos.core.VSP;
 import ru.idealplm.vsp.oceanos.core.VSPSettings;
 import ru.idealplm.vsp.oceanos.data.ReportLine;
 import ru.idealplm.vsp.oceanos.data.ReportLine.ReportLineType;
@@ -41,14 +39,12 @@ public class XmlBuilder
 	private int currentLineNum = 1;
 	private int currentPageNum = 1;
 	
-	private VSP vsp;
 	private Report report;
 
-	public XmlBuilder(XmlBuilderConfiguration configuration, VSP vsp)
+	public XmlBuilder(XmlBuilderConfiguration configuration, Report report)
 	{
 		this.configuration = configuration;
-		this.vsp = vsp;
-		this.report = vsp.report;
+		this.report = report;
 	}
 
 	public void setConfiguration(XmlBuilderConfiguration configuration)
@@ -92,25 +88,25 @@ public class XmlBuilder
 	public void addStampData()
 	{
 		node = document.createElement("Izdelie_osnovnai_nadpis");
-		node.setAttribute("NAIMEN", vsp.stampData.name + " Ведомость спецификаций");
-		node.setAttribute("OBOZNACH", vsp.stampData.id);
-		node.setAttribute("PERVPRIM", vsp.stampData.pervPrim);
-		node.setAttribute("LITERA1", vsp.stampData.litera1);
-		node.setAttribute("LITERA2", vsp.stampData.litera2);
-		node.setAttribute("LITERA3", vsp.stampData.litera3);
-		node.setAttribute("INVNO", vsp.stampData.invNo);
+		node.setAttribute("NAIMEN", report.stampData.name + " Ведомость спецификаций");
+		node.setAttribute("OBOZNACH", report.stampData.id);
+		node.setAttribute("PERVPRIM", report.stampData.pervPrim);
+		node.setAttribute("LITERA1", report.stampData.litera1);
+		node.setAttribute("LITERA2", report.stampData.litera2);
+		node.setAttribute("LITERA3", report.stampData.litera3);
+		node.setAttribute("INVNO", report.stampData.invNo);
 		
-		node.setAttribute("RAZR", vsp.stampData.design);
-		node.setAttribute("PROV", vsp.stampData.check);
-		node.setAttribute("ADDCHECKER", vsp.stampData.techCheck);
-		node.setAttribute("NORM", vsp.stampData.normCheck);
-		node.setAttribute("UTV", vsp.stampData.approve);
-		vsp.stampData.print();
-		node.setAttribute("CRTDATE", vsp.stampData.designDate.isEmpty()?"":DateUtil.parseDateFromTC(vsp.stampData.designDate));
-		node.setAttribute("CHKDATE", vsp.stampData.checkDate.isEmpty()?"":DateUtil.parseDateFromTC(vsp.stampData.checkDate));
-		node.setAttribute("TCHKDATE", vsp.stampData.techCheckDate.isEmpty()?"":DateUtil.parseDateFromTC(vsp.stampData.techCheckDate));
-		node.setAttribute("CTRLDATE", vsp.stampData.normCheck.isEmpty()?"":DateUtil.parseDateFromTC(vsp.stampData.normCheck));
-		node.setAttribute("APRDATE", vsp.stampData.approveDate.isEmpty()?"":DateUtil.parseDateFromTC(vsp.stampData.approveDate));
+		node.setAttribute("RAZR", report.stampData.design);
+		node.setAttribute("PROV", report.stampData.check);
+		node.setAttribute("ADDCHECKER", report.stampData.techCheck);
+		node.setAttribute("NORM", report.stampData.normCheck);
+		node.setAttribute("UTV", report.stampData.approve);
+		report.stampData.print();
+		node.setAttribute("CRTDATE", report.stampData.designDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.designDate));
+		node.setAttribute("CHKDATE", report.stampData.checkDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.checkDate));
+		node.setAttribute("TCHKDATE", report.stampData.techCheckDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.techCheckDate));
+		node.setAttribute("CTRLDATE", report.stampData.normCheck.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.normCheck));
+		node.setAttribute("APRDATE", report.stampData.approveDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.approveDate));
 		
 		node_root.appendChild(node);
 	}
@@ -167,10 +163,10 @@ public class XmlBuilder
 				node.setTextContent(line.id);
 				node_occ.appendChild(node);
 				
-				
 				currentOccurence = line.occurences.get(0);
+				int currentOccurenceHeight = calcOccurenceHeight(currentOccurence);
 				
-				if(!line.id.equals(VSP.topItemId) && currentOccurence.getParentId().equals(VSP.topItemId)){
+				if(!line.id.equals(report.targetId) && currentOccurence.getParentId().equals(report.targetId)){
 					node = document.createElement("Col_" + 4);
 					node.setAttribute("align", "left");
 					node.setTextContent(currentOccurence.getParentId());
@@ -184,7 +180,7 @@ public class XmlBuilder
 				
 				node = document.createElement("Col_" + 6);
 				node.setAttribute("align", "center");
-				node.setTextContent(String.valueOf(currentOccurence.getTotalQuantity()));
+				node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
 				node_occ.appendChild(node);
 				
 				node = document.createElement("Col_" + 7);
@@ -221,7 +217,7 @@ public class XmlBuilder
 				
 				node = document.createElement("Col_" + 6);
 				node.setAttribute("align", "center");
-				node.setTextContent(String.valueOf(currentOccurence.getTotalQuantity()));
+				node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
 				node_occ.appendChild(node);
 				
 				node = document.createElement("Col_" + 7);
@@ -241,6 +237,7 @@ public class XmlBuilder
 			
 			node = document.createElement("Col_" + 6);
 			node.setAttribute("align", "center");
+			line.calcTotalQuantity();
 			node.setTextContent(String.valueOf(line.getTotalQuantity()));
 			node_occ.appendChild(node);
 			

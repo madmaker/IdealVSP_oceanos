@@ -7,8 +7,8 @@ public class ReportLinesComparator implements Comparator<ReportLine>
 {
 	public int compare(ReportLine line0, ReportLine line1)
 	{
-		if(line0.type.ordinal() < line0.type.ordinal()) return -1;
-		if(line0.type.ordinal() > line0.type.ordinal()) return 1;
+		if(line0.type.ordinal() < line1.type.ordinal()) return -1;
+		if(line0.type.ordinal() > line1.type.ordinal()) return 1;
 		
 		String field0 = line0.id;
 		String field1 = line1.id;

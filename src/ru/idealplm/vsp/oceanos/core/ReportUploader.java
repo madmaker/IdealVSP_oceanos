@@ -133,17 +133,17 @@ public class ReportUploader
 			if((tempComp = VSP.vspIR.getRelatedComponent("Oc9_SignRel"))!=null)
 			{
 				System.out.println("+++++FOUND SIGN FORM!!!!");
-				tempComp.setProperty("oc9_Designer", vsp.stampData.design);
-				tempComp.setProperty("oc9_Check", vsp.stampData.check);
-				tempComp.setProperty("oc9_TCheck", vsp.stampData.techCheck);
-				tempComp.setProperty("oc9_NCheck", vsp.stampData.normCheck);
-				tempComp.setProperty("oc9_Approver", vsp.stampData.approve);
+				tempComp.setProperty("oc9_Designer", vsp.report.stampData.design);
+				tempComp.setProperty("oc9_Check", vsp.report.stampData.check);
+				tempComp.setProperty("oc9_TCheck", vsp.report.stampData.techCheck);
+				tempComp.setProperty("oc9_NCheck", vsp.report.stampData.normCheck);
+				tempComp.setProperty("oc9_Approver", vsp.report.stampData.approve);
 				
-				tempComp.setProperty("oc9_DesignDate", vsp.stampData.designDate);
-				tempComp.setProperty("oc9_CheckDate", vsp.stampData.checkDate);
-				tempComp.setProperty("oc9_TCheckDate", vsp.stampData.techCheckDate);
-				tempComp.setProperty("oc9_NCheckDate", vsp.stampData.normCheckDate);
-				tempComp.setProperty("oc9_ApproveDate", vsp.stampData.approveDate);
+				tempComp.setProperty("oc9_DesignDate", vsp.report.stampData.designDate);
+				tempComp.setProperty("oc9_CheckDate", vsp.report.stampData.checkDate);
+				tempComp.setProperty("oc9_TCheckDate", vsp.report.stampData.techCheckDate);
+				tempComp.setProperty("oc9_NCheckDate", vsp.report.stampData.normCheckDate);
+				tempComp.setProperty("oc9_ApproveDate", vsp.report.stampData.approveDate);
 			}
 			/*if(VSP.vspIR.getRelatedComponent("IMAN_master_form_rev")!=null){
 				specIR.getRelatedComponent("IMAN_master_form_rev").setProperty("object_desc", Specification.settings.getStringProperty("blockSettings"));
@@ -151,9 +151,9 @@ public class ReportUploader
 			
 			VSP.vspIR.lock();
 			//topBOMLine.getItemRevision().setProperty("oc9_AddNote", Specification.settings.getStringProperty("AddedText"));
-			VSP.vspIR.setProperty("oc9_Litera1", vsp.stampData.litera1);
-			VSP.vspIR.setProperty("oc9_Litera2", vsp.stampData.litera2);
-			VSP.vspIR.setProperty("oc9_Litera3", vsp.stampData.litera3);
+			VSP.vspIR.setProperty("oc9_Litera1", vsp.report.stampData.litera1);
+			VSP.vspIR.setProperty("oc9_Litera2", vsp.report.stampData.litera2);
+			VSP.vspIR.setProperty("oc9_Litera3", vsp.report.stampData.litera3);
 			VSP.vspIR.save();
 			VSP.vspIR.unlock();
 		} catch (Exception ex) {

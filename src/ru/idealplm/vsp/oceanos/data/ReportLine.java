@@ -17,7 +17,7 @@ public class ReportLine
 	public ArrayList<String> nameLines;
 	public ArrayList<ReportLineOccurence> occurences;
 	public int lineHeight = 1;
-	private int totalQuantity = 1;
+	private int totalQuantity = 0;
 	
 	public ReportLine(ReportLineType type, String name)
 	{
@@ -26,13 +26,16 @@ public class ReportLine
 		this.occurences = new ArrayList<ReportLineOccurence>();
 	}
 	
-	public int getTotalQuantity()
+	public void calcTotalQuantity()
 	{
 		for(ReportLineOccurence occurence : occurences)
 		{
-			totalQuantity += occurence.getTotalQuantity();
+			totalQuantity += occurence.totalQuantity;
 		}
-		
+	}
+	
+	public int getTotalQuantity()
+	{
 		return totalQuantity;
 	}
 	

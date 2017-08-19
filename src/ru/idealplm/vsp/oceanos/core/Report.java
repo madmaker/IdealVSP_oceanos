@@ -19,10 +19,13 @@ public class Report
 	public ReportLineList linesList;
 	public File data;
 	public File report;
+	public StampData stampData;
+	public String targetId;
 	
 	public Report()
 	{
 		linesList = new ReportLineList();
+		stampData = new StampData();
 	}
 	
 	public void isDataValid()

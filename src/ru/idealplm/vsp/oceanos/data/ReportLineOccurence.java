@@ -14,6 +14,7 @@ public class ReportLineOccurence
 	public ArrayList<ReportLineOccurence> children;
 	public int quantity = 1;
 	public int quantityMult = 1;
+	public int totalQuantity = 1;
 	public String remark = "";
 	public ArrayList<String> remarkLines;
 	private int lineHeight = 1;
@@ -25,9 +26,15 @@ public class ReportLineOccurence
 		this.children = new ArrayList<ReportLineOccurence>(1);
 	}
 	
+	public ReportLineOccurence calcTotalQuantity()
+	{
+		totalQuantity = quantity * quantityMult;
+		return this;
+	}
+	
 	public int getTotalQuantity()
 	{
-		return quantity * quantityMult;
+		return totalQuantity;
 	}
 	
 	public String getLineId()
