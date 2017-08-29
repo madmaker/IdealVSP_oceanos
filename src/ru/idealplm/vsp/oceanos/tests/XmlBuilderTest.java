@@ -77,6 +77,7 @@ public class XmlBuilderTest
 		sborka4o1.quantityMult = sborka1o1.getTotalQuantity();
 		sborka2o2.quantity = 2;
 		sborka2o2.quantityMult = sborka4o1.getTotalQuantity();
+		sborka2o1.remark="1";
 		
 		list.addLine(sborka1);
 		list.addLine(sborka2);
@@ -85,6 +86,7 @@ public class XmlBuilderTest
 		list.addLine(kit1);
 		
 		prepareLongData();
+		prepareDocumentData();
 	}
 	
 	public void prepareLongData()
@@ -96,7 +98,8 @@ public class XmlBuilderTest
 		ReportLineOccurence sborka9o1 = new ReportLineOccurence(sborka9, sborka1o1);
 		ReportLineOccurence sborka9o2 = new ReportLineOccurence(sborka9, sborka8o1);
 		
-		sborka9o1.remark = "ииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииии";
+		//sborka9o1.remark = "ииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииии";
+		sborka9o2.remark = "ииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииии";
 		
 		sborka8.id = "РРР.000.008";
 		sborka8.occurences.add(sborka8o1);
@@ -108,6 +111,25 @@ public class XmlBuilderTest
 		
 		list.addLine(sborka8);
 		list.addLine(sborka9);
+	}
+	
+	public void prepareDocumentData()
+	{
+		ReportLine document10 = new ReportLine(ReportLineType.DOCUMENT, "Тхфюьюёђќ ёяхішєшърішщ\nФюъѓьхэђ10 Тб");
+		ReportLine document11 = new ReportLine(ReportLineType.DOCUMENT, "Тхфюьюёђќ ёяхішєшърішщ\nФюъѓьхэђ11 Тб");
+		
+		ReportLineOccurence document1o1 = new ReportLineOccurence(document10, sborka1o1);
+		ReportLineOccurence document2o2 = new ReportLineOccurence(document11, sborka1o1);
+		
+		document10.id = "РРР.000.010";
+		document10.occurences.add(document1o1);
+		document10.uid = "10";
+		document11.id = "РРР.000.011";
+		document11.occurences.add(document2o2);
+		document11.uid = "11";
+		
+		list.addLine(document10);
+		list.addLine(document11);
 	}
 	
 	public void writeReport()

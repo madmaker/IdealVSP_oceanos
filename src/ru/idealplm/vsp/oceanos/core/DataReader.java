@@ -38,7 +38,6 @@ public class DataReader
 	private String blPropertyValues[];
 	private TCComponent document;
 	private ReportLineOccurence emptyOccurence;
-	private ArrayList<TCComponentBOMLine> readBomLines;
 	
 	public DataReader(VSP vsp)
 	{
@@ -47,7 +46,6 @@ public class DataReader
 		pd = vsp.progressMonitor;
 		lineList = vsp.report.linesList;
 		emptyOccurence = new ReportLineOccurence(null, null);
-		readBomLines = new ArrayList<TCComponentBOMLine>();
 	}
 	
 	public void readExistingData()
@@ -56,6 +54,11 @@ public class DataReader
 		readGeneralNoteForm();
 		readExistingVSPData();
 		readSpecifiedItemData();
+	}
+	
+	public void calculateQuantities(ReportLineOccurence occurence)
+	{
+		
 	}
 	
 	public void readData()
@@ -86,8 +89,6 @@ public class DataReader
 	private void readBomData(TCComponentBOMLine bomLine, ReportLineOccurence currentOccurence, ReportLineOccurence parentOccurence, IProgressMonitor monitor)
 	{
 		ReportLineOccurence tempOccurence;
-		//if(readBomLines.contains(bomLine)) return;
-		//ReportLineOccurence currentOccurence = readBomLineData(bomLine, parentOccurence);
 		if(currentOccurence==null) return;
 		ExpandPSOneLevelInfo levelInfo = new ExpandPSOneLevelInfo();
 		ExpandPSOneLevelPref levelPref = new ExpandPSOneLevelPref();
@@ -105,7 +106,6 @@ public class DataReader
 				for (ExpandPSData psData : levelOut.children)
 				{
 					tempOccurence = readBomLineData(psData.bomLine, currentOccurence);
-					readBomLines.add(psData.bomLine);
 					if(tempOccurence!=null)
 						currentOccurence.addChildOccurence(tempOccurence);
 					checkIfMonitorIsCancelled(monitor);
@@ -165,6 +165,8 @@ public class DataReader
 			ReportLine line = new ReportLine(getTypeOfLine(), document.getProperty("object_name"));
 			line.uid = document.getUid();
 			line.id = document.getProperty("item_id");
+			if(line.type==ReportLineType.DOCUMENT) line.name = "Ведомость спецификаций\n"+line.name;
+			System.out.println("new line for "+line.name);
 			resultOccurence = new ReportLineOccurence(line, parentOccurence);
 			resultOccurence.quantity = quantity;
 			resultOccurence.quantityMult = parentOccurence.calcTotalQuantity().getTotalQuantity();
@@ -206,7 +208,7 @@ public class DataReader
 		{
 			String documentId = document.getProperty("item_id");
 			String revId = blPropertyValues[3];
-			if(documentId.equals(revId + " ВС"))
+			if(documentId.equals(revId + " ВС") && !revId.equals(vsp.report.targetId))
 			{
 				type = ReportLineType.DOCUMENT;
 			} else if (blPropertyValues[1].equals("Сборочная единица"))
@@ -245,7 +247,7 @@ public class DataReader
 			for(TCComponent document : documents)
 			{
 				id = document.getProperty("item_id");
-				if(rev.getProperty("item_id").equals(id + " ВС")) {
+				if(id.equals(rev.getProperty("item_id") + " ВС") && !rev.getProperty("item_id").equals(vsp.report.targetId)) {
 					return document;
 				} else if (rev.getProperty("item_id").equals(id)) {
 					result = document;

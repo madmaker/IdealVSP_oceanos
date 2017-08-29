@@ -30,11 +30,11 @@ public class XmlBuilderConfiguration
 	{
 		columnLengths = new HashMap<FormField, Double>();
 		columnLengths.put(FormField.ID, 3d);
-		columnLengths.put(FormField.NAME, 204.0d);
+		columnLengths.put(FormField.NAME, 400.0d);
 		columnLengths.put(FormField.PARENTID, 3d);
 		columnLengths.put(FormField.QUANTITY, 3d);
 		columnLengths.put(FormField.TOTALQUANTITY, 3d);
-		columnLengths.put(FormField.REMARK, 88d);
+		columnLengths.put(FormField.REMARK, 270d);
 	}
 	
 	public void setColumnLengths(HashMap<FormField, Double> columnLengths)

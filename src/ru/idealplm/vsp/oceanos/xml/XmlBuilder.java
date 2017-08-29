@@ -105,7 +105,7 @@ public class XmlBuilder
 		node.setAttribute("CRTDATE", report.stampData.designDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.designDate));
 		node.setAttribute("CHKDATE", report.stampData.checkDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.checkDate));
 		node.setAttribute("TCHKDATE", report.stampData.techCheckDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.techCheckDate));
-		node.setAttribute("CTRLDATE", report.stampData.normCheck.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.normCheck));
+		node.setAttribute("CTRLDATE", report.stampData.normCheckDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.normCheck));
 		node.setAttribute("APRDATE", report.stampData.approveDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.approveDate));
 		
 		node_root.appendChild(node);
@@ -122,15 +122,24 @@ public class XmlBuilder
 		{
 			newPage();
 		}
+		ReportLineType previousLineType = ReportLineType.NONE;
 		
 		for(ReportLine line : report.linesList.getSortedList())
 		{
 			int lineHeight = calcLineHeight(line);
 			if(getFreeLinesNum() < 1 + lineHeight) newPage();
+			ReportLineType currentLineType = line.type;
+			
+			// Adding empty line before Document lines
+			if(previousLineType!=ReportLineType.NONE && previousLineType!=ReportLineType.DOCUMENT && currentLineType==ReportLineType.DOCUMENT)
+			{
+				addEmptyLines(1);
+			}
+			previousLineType = currentLineType;
 			
 			if(line.type==ReportLineType.ASSEMBLY || line.type==ReportLineType.KIT)
 			{
-				addAssyOrKitLine(line);
+				addAssyOrKitLine2(line);
 			} else 
 			{
 				addDocumentLine(line);
@@ -138,6 +147,107 @@ public class XmlBuilder
 		}
 		
 		node_root.appendChild(node_block);
+	}
+	
+	public void addAssyOrKitLine2(ReportLine line)
+	{
+		ReportLineOccurence currentOccurence;
+		int lineHeight = line.lineHeight;
+		int occurencesHeight = 0;
+		for(ReportLineOccurence occurence:line.occurences) occurencesHeight+=calcOccurenceHeight(occurence);
+		int totalHeight = lineHeight>occurencesHeight?lineHeight:occurencesHeight;
+		int currentOccurenceNumber = 0;
+		int currentOccurenceRemarkLine = 0;
+		
+		for(int i = 0; i < totalHeight; i++)
+		{
+			node_occ = document.createElement("Occurrence");
+			System.out.println(line.name + " " + currentOccurenceNumber + " lh" + lineHeight + " os" + line.occurences.size() + " th" + totalHeight);
+			// If it is the first line, we print first line info and increment currentLine number
+			if(i==0)
+			{
+				// Line number
+				node = document.createElement("Col_" + 1);
+				node.setAttribute("align", "center");
+				node.setTextContent(String.valueOf(currentLineNum));
+				node_occ.appendChild(node);
+				currentLineNum++;
+				// Id of the line
+				node = document.createElement("Col_" + 2);
+				node.setAttribute("align", "left");
+				node.setTextContent(line.id);
+				node_occ.appendChild(node);
+				// Name
+				node = document.createElement("Col_" + 3);
+				node.setAttribute("align", "left");
+				node.setTextContent(line.nameLines.get(i));
+				node_occ.appendChild(node);
+			} else if (lineHeight>i && lineHeight <= totalHeight) {
+				System.out.println("new line for name");
+				// If line name takes multiple lines, we print it
+				node = document.createElement("Col_" + 3);
+				node.setAttribute("align", "left");
+				node.setTextContent(line.nameLines.get(i));
+				node_occ.appendChild(node);
+			}
+			// If there are still occurences left
+			if(currentOccurenceNumber < line.occurences.size()){
+				currentOccurence = line.occurences.get(currentOccurenceNumber);
+				//Occurence first line info
+				if(currentOccurenceRemarkLine==0)
+				{
+					//Parent id
+					node = document.createElement("Col_" + 4);
+					node.setAttribute("align", "left");
+					node.setTextContent(currentOccurence.getParentId());
+					node_occ.appendChild(node);
+					// Quantity
+					node = document.createElement("Col_" + 5);
+					node.setAttribute("align", "center");
+					node.setTextContent(String.valueOf(currentOccurence.quantity));
+					node_occ.appendChild(node);
+					// Total quantity
+					node = document.createElement("Col_" + 6);
+					node.setAttribute("align", "center");
+					node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
+					node_occ.appendChild(node);
+				}
+				// Remark
+				node = document.createElement("Col_" + 7);
+				node.setAttribute("align", "left");
+				node.setTextContent(currentOccurence.remarkLines.size()>0?currentOccurence.remarkLines.get(currentOccurenceRemarkLine):"");
+				node_occ.appendChild(node);
+				
+				currentOccurenceRemarkLine++;
+				if(currentOccurenceRemarkLine >= currentOccurence.getLineHeight())
+				{
+					currentOccurenceRemarkLine = 0;
+					currentOccurenceNumber++;
+				}
+				
+			}
+			
+			node_block.appendChild(node_occ);
+			
+			//If it is the last line
+			if(i==(totalHeight-1) && line.occurences.size()>1)
+			{
+				System.out.println("YEAHHH!");
+				node_occ = document.createElement("Occurrence");
+				node = document.createElement("Col_" + 1);
+				node.setAttribute("align", "center");
+				node.setTextContent(String.valueOf(currentLineNum));
+				node_occ.appendChild(node);
+				
+				node = document.createElement("Col_" + 6);
+				node.setAttribute("align", "center");
+				line.calcTotalQuantity();
+				node.setTextContent(String.valueOf(line.getTotalQuantity()));
+				node_occ.appendChild(node);
+				currentLineNum++;
+				node_block.appendChild(node_occ);
+			}
+		}
 	}
 	
 	public void addAssyOrKitLine(ReportLine line)
@@ -183,10 +293,12 @@ public class XmlBuilder
 				node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
 				node_occ.appendChild(node);
 				
-				node = document.createElement("Col_" + 7);
-				node.setAttribute("align", "left");
-				node.setTextContent(currentOccurence.remark);
-				node_occ.appendChild(node);
+				for(String remarkLine : currentOccurence.remarkLines){
+					node = document.createElement("Col_" + 7);
+					node.setAttribute("align", "left");
+					node.setTextContent(remarkLine);
+					node_occ.appendChild(node);
+				}
 				
 			}
 			node = document.createElement("Col_" + 3);
@@ -248,7 +360,35 @@ public class XmlBuilder
 	
 	public void addDocumentLine(ReportLine line)
 	{
-		
+		int lineHeight = line.lineHeight;
+		//node_occ = document.createElement("Occurrence");
+		for(int i = 0; i < lineHeight; i++)
+		{
+			node_occ = document.createElement("Occurrence");
+			// If it is the first line, we print first line info and increment currentLine number
+			if(i==0)
+			{
+				// Line number
+				node = document.createElement("Col_" + 1);
+				node.setAttribute("align", "center");
+				node.setTextContent(String.valueOf(currentLineNum));
+				node_occ.appendChild(node);
+				currentLineNum++;
+				// Name
+				node = document.createElement("Col_" + 3);
+				node.setAttribute("align", "left");
+				node.setTextContent(line.nameLines.get(i));
+				node_occ.appendChild(node);
+			} else {
+				System.out.println("new line for name");
+				// If line name takes multiple lines, we print it
+				node = document.createElement("Col_" + 3);
+				node.setAttribute("align", "left");
+				node.setTextContent(line.nameLines.get(i));
+				node_occ.appendChild(node);
+			}
+			node_block.appendChild(node_occ);
+		}
 	}
 	
 	public int calcLineHeight(ReportLine line)

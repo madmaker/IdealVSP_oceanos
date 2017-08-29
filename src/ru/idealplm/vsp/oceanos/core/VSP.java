@@ -33,7 +33,6 @@ public class VSP
 	public static TCComponentItemRevision topBOMLineIR;
 	public static TCComponentItemRevision vspIR;
 	public static TCComponent generalNoteForm;
-	public static String topItemId;
 	
 	public static ErrorList errorList;
 
@@ -57,7 +56,7 @@ public class VSP
 			topBOMLine = Activator.getPSEService().getTopBOMLine();
 			topBOMLineI = topBOMLine.getItem();
 			topBOMLineIR = topBOMLine.getItemRevision();
-			topItemId = topBOMLineI.getProperty("item_id");
+			report.targetId = topBOMLineI.getProperty("item_id");
 			dataReader = new DataReader(this);
 			
 			String[] emptyValues = {};

@@ -57,6 +57,16 @@ public class ReportLineOccurence
 		remarkLines = new ArrayList<String>(1);
 		remarkLines = LineUtil.getFittedLines(remark, maxWidth);
 		lineHeight = remarkLines.size();
+		if(lineHeight == 0)
+		{
+			lineHeight = 1;
+			remarkLines.add(remark);
+		}
+		return lineHeight;
+	}
+	
+	public int getLineHeight()
+	{
 		return lineHeight;
 	}
 }
