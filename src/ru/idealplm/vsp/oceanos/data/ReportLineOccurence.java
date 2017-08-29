@@ -13,7 +13,7 @@ public class ReportLineOccurence
 	public ReportLineOccurence parentOccurence;
 	public ArrayList<ReportLineOccurence> children;
 	public int quantity = 1;
-	public int quantityMult = 1;
+	public int quantityMult = 0;
 	public int totalQuantity = 1;
 	public String remark = "";
 	public ArrayList<String> remarkLines;
@@ -28,6 +28,7 @@ public class ReportLineOccurence
 	
 	public ReportLineOccurence calcTotalQuantity()
 	{
+		if(quantityMult == 0) quantityMult = 1;
 		totalQuantity = quantity * quantityMult;
 		return this;
 	}
@@ -64,6 +65,24 @@ public class ReportLineOccurence
 		}
 		return lineHeight;
 	}
+	
+	/*public void setQuantityMultiplier(int multiplier)
+	{
+		this.quantityMult = multiplier;
+		for(ReportLineOccurence occurence:children)
+		{
+			occurence.updateQuantityMultiplier(quantityMult);
+		}
+	}
+	
+	public void updateQuantityMultiplier(int multiplier)
+	{
+		this.quantityMult += multiplier;
+		for(ReportLineOccurence occurence:children)
+		{
+			occurence.updateQuantityMultiplier(quantityMult);
+		}
+	}*/
 	
 	public int getLineHeight()
 	{

@@ -38,6 +38,17 @@ public class DataReader
 	private String blPropertyValues[];
 	private TCComponent document;
 	private ReportLineOccurence emptyOccurence;
+	private ReportLineOccurence topOccurence;
+	private int level = 0;
+	
+	private String tab(int level)
+	{
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < level; i++){
+			builder.append("\t");
+		}
+		return builder.toString();
+	}
 	
 	public DataReader(VSP vsp)
 	{
@@ -58,7 +69,19 @@ public class DataReader
 	
 	public void calculateQuantities(ReportLineOccurence occurence)
 	{
-		
+		System.out.println(tab(level)+"WORKING WITH " + occurence.reportLine.name + " ,current q=" + occurence.quantity + " m=" + occurence.quantityMult);
+		occurence.calcTotalQuantity();
+		for(ReportLineOccurence childOccurence : occurence.children)
+		{
+			System.out.println(tab(level)+"SETTING QUANTITYMULT " + occurence.quantity + " FOR " + childOccurence.reportLine.name);
+			childOccurence.quantityMult = occurence.getTotalQuantity();
+		}
+		level++;
+		for(ReportLineOccurence childOccurence : occurence.children)
+		{
+			calculateQuantities(childOccurence);
+		}
+		level--;
 	}
 	
 	public void readData()
@@ -70,7 +93,9 @@ public class DataReader
 				{
 					monitor.beginTask("Чтение данных", 100);
 					ReportLineOccurence currentOccurence = readBomLineData(VSP.topBOMLine, emptyOccurence);
+					topOccurence = currentOccurence;
 					readBomData(VSP.topBOMLine, currentOccurence, emptyOccurence, monitor);
+					calculateQuantities(topOccurence);
 					monitor.done();
 				}
 			});
@@ -146,7 +171,7 @@ public class DataReader
 			if(document!=null){
 				System.out.println("processing doc="+document.getUid());
 				if(lineList.containsLineWithUid(document.getUid())){
-					updateExistingLine(bomLine, parentOccurence);
+					resultOccurence = updateExistingLine(bomLine, parentOccurence);
 				} else {
 					resultOccurence = addNewLine(bomLine, parentOccurence);
 				}
@@ -169,7 +194,6 @@ public class DataReader
 			System.out.println("new line for "+line.name);
 			resultOccurence = new ReportLineOccurence(line, parentOccurence);
 			resultOccurence.quantity = quantity;
-			resultOccurence.quantityMult = parentOccurence.calcTotalQuantity().getTotalQuantity();
 			resultOccurence.bomLine = bomLine;
 			resultOccurence.remark = blPropertyValues[4];
 			line.occurences.add(resultOccurence);
@@ -181,17 +205,18 @@ public class DataReader
 		return resultOccurence;
 	}
 	
-	public void updateExistingLine(TCComponentBOMLine bomLine, ReportLineOccurence parentOccurence)
+	public ReportLineOccurence updateExistingLine(TCComponentBOMLine bomLine, ReportLineOccurence parentOccurence)
 	{
 		ReportLineOccurence resultOccurence = null;
 		int quantity = blPropertyValues[2].trim().isEmpty()?1:Integer.parseInt(blPropertyValues[2]);
 		ReportLine line = lineList.getLine(document.getUid());
 		resultOccurence = new ReportLineOccurence(line, parentOccurence);
+		//parentOccurence.addChildOccurence(resultOccurence);
 		resultOccurence.quantity = quantity;
-		resultOccurence.quantityMult = parentOccurence.calcTotalQuantity().getTotalQuantity();
 		resultOccurence.bomLine = bomLine;
 		resultOccurence.remark = blPropertyValues[4];
 		line.occurences.add(resultOccurence);
+		return resultOccurence;
 	}
 	
 	public boolean hasValidType(String itemType, String partType)
