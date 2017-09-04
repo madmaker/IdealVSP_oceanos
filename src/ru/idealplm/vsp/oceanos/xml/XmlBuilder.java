@@ -88,7 +88,7 @@ public class XmlBuilder
 	public void addStampData()
 	{
 		node = document.createElement("Izdelie_osnovnai_nadpis");
-		node.setAttribute("NAIMEN", report.stampData.name + " Ведомость спецификаций");
+		node.setAttribute("NAIMEN", report.stampData.name);
 		node.setAttribute("OBOZNACH", report.stampData.id);
 		node.setAttribute("PERVPRIM", report.stampData.pervPrim);
 		node.setAttribute("LITERA1", report.stampData.litera1);

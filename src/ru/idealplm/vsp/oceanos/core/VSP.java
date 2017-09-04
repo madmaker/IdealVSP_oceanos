@@ -95,7 +95,7 @@ public class VSP
 			InputStream template = VSP.class.getResourceAsStream("/pdf/OceanosVSPPDFTemplate.xsl");
 			InputStream config = VSP.class.getResourceAsStream("/pdf/OceanosVSPUserconfig.xml");
 			PDFReportBuilderConfiguration A3pdfBuilderconfiguration = new PDFReportBuilderConfiguration(template, config);
-			System.out.println("SIZEEEEE"+report.linesList.getSortedList().size());
+			System.out.println("SIZEEEEE"+report.linesList.getSortedList().size() + "tisnull=" + template==null);
 	
 			report.configuration = A3pdfBuilderconfiguration;
 	
