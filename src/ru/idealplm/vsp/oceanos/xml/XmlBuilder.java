@@ -66,10 +66,11 @@ public class XmlBuilder
 			node_root.appendChild(node);
 			
 			addStampData();
+			addExtraData();
 			processData();
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			DOMSource source = new DOMSource(document);
-			File xmlFile = File.createTempFile("vsp_", ".xml");
+			File xmlFile = File.createTempFile(report.stampData.id+"_", ".xml");
 			StreamResult result = new StreamResult(xmlFile);
 			transformer.transform(source, result);
 			return xmlFile;
@@ -108,6 +109,13 @@ public class XmlBuilder
 		node.setAttribute("CTRLDATE", report.stampData.normCheckDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.normCheck));
 		node.setAttribute("APRDATE", report.stampData.approveDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.approveDate));
 		
+		node_root.appendChild(node);
+	}
+	
+	public void addExtraData()
+	{
+		node = document.createElement("FileData");
+		node.setAttribute("FileName", "Файл ведомости спецификаций: " + report.stampData.id+".pdf/" + report.stampData.reportRevNo);
 		node_root.appendChild(node);
 	}
 	

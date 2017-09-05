@@ -104,16 +104,22 @@
 		   
 		   <!-- Установлен отступ снизу 146.75 поскольку толщина нижней границы =0.5мм, а изначально отступ был 147мм) -->
            <fo:block-container position="absolute"  reference-orientation="90"  top="146.75mm" left="8mm" height="12mm" width="145mm">
-                <xsl:call-template name="Add_main_stamp_gost_2104_68"/>
+                <xsl:call-template name="Add_main_stamp_gost_2104_68">
+					<xsl:with-param name="invNo" select="root/Izdelie_osnovnai_nadpis/@INVNO"/>
+				   <xsl:with-param name="aprDate" select="root/Izdelie_osnovnai_nadpis/@APRDATE"/>
+                </xsl:call-template>
            </fo:block-container>
 
         </fo:static-content>
 
 
         <fo:static-content flow-name="first-region-end">
-           <fo:block-container border-color="black" border-left-style="solid" border-left="0.5mm" position="absolute" top="5mm" bottom="5mm" left="0mm-0.15mm" right="0mm">
+           <fo:block-container border-color="black" border-left-style="solid" border-left="0.5mm" position="absolute" top="5mm" bottom="5mm" left="0.25mm" right="0mm">
              <fo:block/>
            </fo:block-container>
+		   <fo:block-container position="absolute" top="5mm" bottom="10mm" left="1.41mm" right="0mm" reference-orientation="90">
+		     <fo:block font-style="italic" font-size="3mm"><xsl:value-of select="root/FileData/@FileName"/></fo:block>
+		   </fo:block-container>
         </fo:static-content>
 
 
@@ -231,9 +237,12 @@
 
 
         <fo:static-content flow-name="other-region-end">
-           <fo:block-container border-color="black" border-left-style="solid" border-left="0.5mm" position="absolute" top="5mm" bottom="5mm" left="0mm-0.15mm" right="0mm">
+           <fo:block-container border-color="black" border-left-style="solid" border-left="0.5mm" position="absolute" top="5mm" bottom="5mm" left="0.25mm" right="0mm">
              <fo:block/>
            </fo:block-container>
+		   <fo:block-container position="absolute" top="5mm" bottom="10mm" left="1.41mm" right="0mm" reference-orientation="90">
+		     <fo:block font-style="italic" font-size="3mm"><xsl:value-of select="root/FileData/@FileName"/></fo:block>
+		   </fo:block-container>
         </fo:static-content>
 
 
@@ -684,7 +693,7 @@
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block margin-left="0.5mm" font-style="italic" font-size="2.5mm"><xsl:value-of select="$Razr"/></fo:block></fo:table-cell>
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
                   <fo:table-cell border-width="0.5mm" border-style="solid"><fo:block text-align="center" font-style="italic" font-size="2.5mm"><xsl:value-of select="$crtDate"/></fo:block></fo:table-cell>
-                  <fo:table-cell border-width="0.5mm" border-style="solid" number-rows-spanned="5" > <xsl:call-template name="Text_container"><xsl:with-param name="Text" select="$Naimen"/><xsl:with-param name="Height">24mm</xsl:with-param><xsl:with-param name="Width">70mm</xsl:with-param></xsl:call-template></fo:table-cell>
+                  <fo:table-cell border-width="0.5mm" border-style="solid" number-rows-spanned="5" > <xsl:call-template name="Naimen_container"><xsl:with-param name="Text" select="$Naimen"/><xsl:with-param name="Height">24mm</xsl:with-param><xsl:with-param name="Width">70mm</xsl:with-param></xsl:call-template></fo:table-cell>
                   <fo:table-cell border-width="0.5mm" border-style="solid" number-columns-spanned="3"><fo:block text-align="center" font-style="italic">Лит.</fo:block></fo:table-cell>
                   <!-- Spanned sells number-columns-spanned="3" -->
                   <!-- Spanned sells number-columns-spanned="3" -->
@@ -808,6 +817,9 @@
 
 
 <xsl:template name="Add_main_stamp_gost_2104_68">
+	<xsl:param name="invNo"/>
+	<xsl:param name="aprDate"/>
+	
     <fo:table table-layout="fixed" font-style="normal" width="100%" border-collapse="collapse">
       <fo:table-column column-width="25mm"/>
       <fo:table-column column-width="35mm"/>
@@ -823,8 +835,8 @@
                    <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block text-align="center" font-style="italic" margin-top="0.5mm" font-size="3mm">Подп. и дата</fo:block></fo:table-cell>
                  </fo:table-row>
                  <fo:table-row  height="6.5mm" border-width="0.5mm">
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
+                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block margin-top="2mm" text-align="center" font-size="3mm"><fo:inline font-style="italic"><xsl:value-of select="$invNo"/></fo:inline></fo:block></fo:table-cell>
+                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block margin-right="1mm" margin-top="2mm" text-align="right" font-size="3mm"><fo:inline font-style="italic"><xsl:value-of select="$aprDate"/></fo:inline></fo:block></fo:table-cell>
                    <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
                    <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
                    <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
@@ -841,6 +853,19 @@
 	<fo:block-container height="{$Height}" display-align="center">
 		<fo:block font-style="italic" text-align="center" font-size="6mm"><xsl:value-of select="$Text"/></fo:block>
 	</fo:block-container>
+</xsl:template>
+
+<xsl:template name="Naimen_container">
+    <xsl:param name="Height"/>
+    <xsl:param name="Text"/>
+        <fo:block-container height="{$Height}" line-height="6mm" display-align="center">
+        	<fo:block text-align="center" font-size="6mm">
+        		<xsl:value-of select="$Text"/>
+        	</fo:block>
+         	<fo:block text-align="center" padding-top="1.4mm" font-size="5mm">
+        		<xsl:text>Ведомость спецификаций</xsl:text>
+        	</fo:block>
+        </fo:block-container>
 </xsl:template>
 
 <xsl:template name="sqrt">

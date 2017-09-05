@@ -91,7 +91,7 @@ public class DateUtil
 	public static Date getDateFormSimpleString(String s_date)
 	{
 		int year = Integer.parseInt(s_date.substring(s_date.lastIndexOf(".")+1, s_date.length()))+100;
-		int month = Integer.parseInt(s_date.substring(s_date.indexOf(".")+1, s_date.lastIndexOf(".")));
+		int month = Integer.parseInt(s_date.substring(s_date.indexOf(".")+1, s_date.lastIndexOf(".")))-1;
 		int date = Integer.parseInt(s_date.substring(0, s_date.indexOf(".")));
 		return new Date(year, month, date);
 	}

@@ -19,6 +19,8 @@ public class StampData
 	public String	techCheckDate = "";
 	public String	normCheck = "";
 	public String	normCheckDate = "";
+	public String 	reportRevNo = "0";
+	public String 	reportFileName = "";
 	
 	public void print()
 	{

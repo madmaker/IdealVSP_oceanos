@@ -316,6 +316,7 @@ public class DataReader
 				stampData.litera3 = VSP.vspIR.getProperty("oc9_Litera3");
 				stampData.pervPrim = VSP.vspIR.getItem().getProperty("oc9_PrimaryApp");
 				stampData.invNo = VSP.vspIR.getItem().getProperty("oc9_InvNo");
+				stampData.reportRevNo = VSP.vspIR.getProperty("item_revision_id");
 			}
 		} catch (TCException ex) {
 			ex.printStackTrace();
