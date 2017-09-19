@@ -45,7 +45,7 @@ public class ReportLineOccurence
 	public void setQuantity(int quantity)
 	{
 		this.quantity = quantity;
-		this.totalQuantity = parent.quantity * quantity;
+		this.totalQuantity = parent.totalQuantity * quantity;
 	}
 	
 	public String getParentItemId()

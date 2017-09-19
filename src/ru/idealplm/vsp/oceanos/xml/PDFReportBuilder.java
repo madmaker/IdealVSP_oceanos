@@ -59,7 +59,7 @@ public class PDFReportBuilder
 	public void buildReportStatic()
 	{
 		report.isDataValid();
-		/*try
+		try
 		{
 			FileUtil.copy(PDFReportBuilder.class.getResourceAsStream("/icons/iconOceanos.jpg"),
 					new File(report.data.getParentFile().getAbsolutePath() + "\\iconOceanos.jpg"));
@@ -67,7 +67,7 @@ public class PDFReportBuilder
 		catch (IOException e)
 		{
 			e.printStackTrace();
-		}*/
+		}
 		report.report = PDFBuilder.xml2pdf(report.data, ((PDFReportBuilderConfiguration)report.configuration).getTemplateStream(), ((PDFReportBuilderConfiguration)report.configuration).getConfigStream());
 	}
 }
