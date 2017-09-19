@@ -1,8 +1,7 @@
 package ru.idealplm.vsp.oceanos.data;
 
 import java.util.ArrayList;
-
-import ru.idealplm.vsp.oceanos.util.LineUtil;
+import java.util.HashMap;
 
 public class ReportLine
 {
@@ -10,40 +9,57 @@ public class ReportLine
 		NONE, ASSEMBLY, KIT, DOCUMENT
 	};
 	
-	public String uid;
 	public ReportLineType type;
+	public String uid;
 	public String id;
 	public String name;
-	public ArrayList<String> nameLines;
-	public ArrayList<ReportLineOccurence> occurences;
-	public int lineHeight = 1;
 	private int totalQuantity = 0;
+	
+	private HashMap<String, ReportLineOccurence> occurences;
 	
 	public ReportLine(ReportLineType type, String name)
 	{
 		this.type = type;
 		this.name = name;
-		this.occurences = new ArrayList<ReportLineOccurence>();
+		this.occurences = new HashMap<String, ReportLineOccurence>(1);
 	}
 	
-	public void calcTotalQuantity()
+	public final ArrayList<ReportLineOccurence> occurences()
 	{
-		for(ReportLineOccurence occurence : occurences)
+		final ArrayList<ReportLineOccurence> lines = new ArrayList<ReportLineOccurence>(occurences.values());
+		return lines;
+	}
+	
+	public void addOccurence(ReportLineOccurence occurence)
+	{
+		occurence.reportLine = this;
+		occurences.put(occurence.getParentItemUID(), occurence);
+	}
+	
+	public void updateOccurence(ReportLineOccurence occurence)
+	{
+		if(occurences.containsKey(occurence.getParentItemUID()))
 		{
-			totalQuantity += occurence.totalQuantity;
+			ReportLineOccurence existingOccurence = occurences.get(occurence.getParentItemUID());
+			System.out.println("Existing:"+existingOccurence.totalQuantity+" + new:"+occurence.totalQuantity);
+			existingOccurence.totalQuantity += occurence.totalQuantity;
+		} 
+		else {
+			addOccurence(occurence);
 		}
 	}
 	
 	public int getTotalQuantity()
 	{
+		calcTotalQuantity(); 
 		return totalQuantity;
 	}
 	
-	public int calcLineHeight(double maxWidth)
+	private void calcTotalQuantity()
 	{
-		nameLines = new ArrayList<String>(1);
-		nameLines = LineUtil.getFittedLines(name, maxWidth);
-		lineHeight = nameLines.size();
-		return lineHeight;
+		for(ReportLineOccurence occurence : occurences.values())
+		{
+			totalQuantity += occurence.totalQuantity;
+		}
 	}
 }

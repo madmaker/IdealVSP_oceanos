@@ -1,6 +1,7 @@
 package ru.idealplm.vsp.oceanos.core;
 
 import java.util.Comparator;
+
 import ru.idealplm.vsp.oceanos.data.ReportLine;
 
 public class ReportLinesComparator implements Comparator<ReportLine>

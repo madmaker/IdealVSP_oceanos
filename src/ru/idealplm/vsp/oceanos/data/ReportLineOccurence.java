@@ -4,88 +4,82 @@ import java.util.ArrayList;
 
 import com.teamcenter.rac.kernel.TCComponentBOMLine;
 
-import ru.idealplm.vsp.oceanos.util.LineUtil;
-
 public class ReportLineOccurence
 {
-	public TCComponentBOMLine bomLine;
 	public ReportLine reportLine;
-	public ReportLineOccurence parentOccurence;
-	public ArrayList<ReportLineOccurence> children;
+	public TCComponentBOMLine bomLine;
 	public int quantity = 1;
-	public int quantityMult = 0;
 	public int totalQuantity = 1;
 	public String remark = "";
-	public ArrayList<String> remarkLines;
-	private int lineHeight = 1;
+	
+	private ReportLineOccurence parent;
+	private ArrayList<ReportLineOccurence> children;
 	
 	public ReportLineOccurence(ReportLine reportLine, ReportLineOccurence parentOccurence)
 	{
-		this.parentOccurence = parentOccurence;
 		this.reportLine = reportLine;
+		this.parent = parentOccurence;
 		this.children = new ArrayList<ReportLineOccurence>(1);
 	}
 	
-	public ReportLineOccurence calcTotalQuantity()
+	public void addChild(ReportLineOccurence child)
 	{
-		if(quantityMult == 0) quantityMult = 1;
-		totalQuantity = quantity * quantityMult;
-		return this;
+		children.add(child);
 	}
 	
-	public int getTotalQuantity()
+	public int getChildrenCount()
 	{
-		return totalQuantity;
+		return children.size();
 	}
 	
-	public String getLineId()
+	public ReportLineOccurence getChild(int index)
 	{
-		return reportLine==null?"":reportLine.id;
+		return children.get(index);
 	}
 	
-	public String getParentId()
+	public ArrayList<ReportLineOccurence> getChildren()
 	{
-		return parentOccurence==null?"":parentOccurence.getLineId();
+		return children;
 	}
 	
-	public void addChildOccurence(ReportLineOccurence child)
+	public void setQuantity(int quantity)
 	{
-		this.children.add(child);
+		this.quantity = quantity;
+		this.totalQuantity = parent.quantity * quantity;
 	}
 	
-	public int calcLineHeight(double maxWidth)
+	public String getParentItemId()
 	{
-		remarkLines = new ArrayList<String>(1);
-		remarkLines = LineUtil.getFittedLines(remark, maxWidth);
-		lineHeight = remarkLines.size();
-		if(lineHeight == 0)
-		{
-			lineHeight = 1;
-			remarkLines.add(remark);
-		}
-		return lineHeight;
+		if(parent!=null && parent.reportLine!=null)
+			return parent.reportLine.id;
+		return "";
 	}
 	
-	/*public void setQuantityMultiplier(int multiplier)
+	public String getParentItemUID()
 	{
-		this.quantityMult = multiplier;
-		for(ReportLineOccurence occurence:children)
-		{
-			occurence.updateQuantityMultiplier(quantityMult);
-		}
+		if(parent!=null && parent.reportLine!=null)
+			return parent.reportLine.uid;
+		return "";
 	}
 	
-	public void updateQuantityMultiplier(int multiplier)
+	@Override
+	public boolean equals(Object v)
 	{
-		this.quantityMult += multiplier;
-		for(ReportLineOccurence occurence:children)
-		{
-			occurence.updateQuantityMultiplier(quantityMult);
-		}
-	}*/
-	
-	public int getLineHeight()
-	{
-		return lineHeight;
+		boolean retVal = false;
+
+	    if (v instanceof ReportLineOccurence){
+	    	ReportLineOccurence ptr = (ReportLineOccurence) v;
+	        retVal = ptr.reportLine.uid.equals(this.reportLine.uid);
+	    }
+	    
+	    return retVal;
 	}
+	
+	@Override
+    public int hashCode()
+	{
+        int hash = 7;
+        hash = 17 * hash + (this.reportLine.uid != null ? this.reportLine.uid.hashCode() : 0);
+        return hash;
+    }
 }

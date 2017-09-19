@@ -6,10 +6,10 @@ import ru.idealplm.vsp.oceanos.core.Report.FormField;
 
 public class XmlBuilderConfiguration
 {
+	public static HashMap<FormField, Double> columnLengths;
 	public int	MaxLinesOnFirstPage;
 	public int	MaxLinesOnOtherPage;
 	public int	MaxWidthGlobalRemark;
-	public HashMap<FormField, Double> columnLengths;
 
 	public XmlBuilderConfiguration()
 	{
@@ -39,6 +39,6 @@ public class XmlBuilderConfiguration
 	
 	public void setColumnLengths(HashMap<FormField, Double> columnLengths)
 	{
-		this.columnLengths = columnLengths;
+		XmlBuilderConfiguration.columnLengths = columnLengths;
 	}
 }

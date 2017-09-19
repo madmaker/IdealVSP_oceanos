@@ -40,6 +40,7 @@ public class XmlBuilder
 	private int currentPageNum = 1;
 	
 	private Report report;
+	private ReportLineXMLRepresentation reportLineXMLRepresentation;
 
 	public XmlBuilder(XmlBuilderConfiguration configuration, Report report)
 	{
@@ -86,7 +87,7 @@ public class XmlBuilder
 		return null;
 	}
 	
-	public void addStampData()
+	private void addStampData()
 	{
 		node = document.createElement("Izdelie_osnovnai_nadpis");
 		node.setAttribute("NAIMEN", report.stampData.name);
@@ -102,7 +103,6 @@ public class XmlBuilder
 		node.setAttribute("ADDCHECKER", report.stampData.techCheck);
 		node.setAttribute("NORM", report.stampData.normCheck);
 		node.setAttribute("UTV", report.stampData.approve);
-		report.stampData.print();
 		node.setAttribute("CRTDATE", report.stampData.designDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.designDate));
 		node.setAttribute("CHKDATE", report.stampData.checkDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.checkDate));
 		node.setAttribute("TCHKDATE", report.stampData.techCheckDate.isEmpty()?"":DateUtil.parseDateFromTC(report.stampData.techCheckDate));
@@ -112,14 +112,14 @@ public class XmlBuilder
 		node_root.appendChild(node);
 	}
 	
-	public void addExtraData()
+	private void addExtraData()
 	{
 		node = document.createElement("FileData");
 		node.setAttribute("FileName", "Файл ведомости спецификаций: " + report.stampData.id+".pdf/" + report.stampData.reportRevNo);
 		node_root.appendChild(node);
 	}
 	
-	public void processData()
+	private void processData()
 	{
 		if (node_block == null)
 		{
@@ -134,7 +134,9 @@ public class XmlBuilder
 		
 		for(ReportLine line : report.linesList.getSortedList())
 		{
-			int lineHeight = calcLineHeight(line);
+			System.out.println("-line!");
+			ReportLineXMLRepresentation reportLineXMLRepresentation = new ReportLineXMLRepresentation(line);
+			int lineHeight = reportLineXMLRepresentation.getLineHeight();
 			if(getFreeLinesNum() < 1 + lineHeight) newPage();
 			ReportLineType currentLineType = line.type;
 			
@@ -145,24 +147,29 @@ public class XmlBuilder
 			}
 			previousLineType = currentLineType;
 			
-			if(line.type==ReportLineType.ASSEMBLY || line.type==ReportLineType.KIT)
+			if(currentLineType==ReportLineType.ASSEMBLY || currentLineType==ReportLineType.KIT)
 			{
-				addAssyOrKitLine2(line);
+				addAssyOrKitLine2(reportLineXMLRepresentation);
 			} else 
 			{
-				addDocumentLine(line);
+				addDocumentLine(reportLineXMLRepresentation);
 			}
 		}
 		
 		node_root.appendChild(node_block);
 	}
 	
-	public void addAssyOrKitLine2(ReportLine line)
+	public void addAssyOrKitLine2(ReportLineXMLRepresentation line)
 	{
-		ReportLineOccurence currentOccurence;
-		int lineHeight = line.lineHeight;
+		ReportLineOccurenceXmlRepresentation currentOccurence;
+		int lineHeight = line.getLineHeight();
+		int totalQuantity = 0;
 		int occurencesHeight = 0;
-		for(ReportLineOccurence occurence:line.occurences) occurencesHeight+=calcOccurenceHeight(occurence);
+		for(ReportLineOccurenceXmlRepresentation occurence:line.occurences) {
+			System.out.println("incrementing with " + occurence.getLineHeight());
+			occurencesHeight += occurence.getLineHeight();
+			totalQuantity += occurence.occurence.totalQuantity;
+		}
 		int totalHeight = lineHeight>occurencesHeight?lineHeight:occurencesHeight;
 		int currentOccurenceNumber = 0;
 		int currentOccurenceRemarkLine = 0;
@@ -170,7 +177,7 @@ public class XmlBuilder
 		for(int i = 0; i < totalHeight; i++)
 		{
 			node_occ = document.createElement("Occurrence");
-			System.out.println(line.name + " " + currentOccurenceNumber + " lh" + lineHeight + " os" + line.occurences.size() + " th" + totalHeight);
+			System.out.println(line.reportLine.name + " " + currentOccurenceNumber + " lh" + lineHeight + " os" + line.occurences.size() + " th" + totalHeight + " oh" + occurencesHeight);
 			// If it is the first line, we print first line info and increment currentLine number
 			if(i==0)
 			{
@@ -183,7 +190,7 @@ public class XmlBuilder
 				// Id of the line
 				node = document.createElement("Col_" + 2);
 				node.setAttribute("align", "left");
-				node.setTextContent(line.id);
+				node.setTextContent(line.reportLine.id);
 				node_occ.appendChild(node);
 				// Name
 				node = document.createElement("Col_" + 3);
@@ -207,17 +214,17 @@ public class XmlBuilder
 					//Parent id
 					node = document.createElement("Col_" + 4);
 					node.setAttribute("align", "left");
-					node.setTextContent(currentOccurence.getParentId());
+					node.setTextContent(currentOccurence.occurence.getParentItemId());
 					node_occ.appendChild(node);
 					// Quantity
 					node = document.createElement("Col_" + 5);
 					node.setAttribute("align", "center");
-					node.setTextContent(String.valueOf(currentOccurence.quantity));
+					node.setTextContent(String.valueOf(currentOccurence.occurence.quantity));
 					node_occ.appendChild(node);
 					// Total quantity
 					node = document.createElement("Col_" + 6);
 					node.setAttribute("align", "center");
-					node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
+					node.setTextContent(String.valueOf(currentOccurence.occurence.totalQuantity));
 					node_occ.appendChild(node);
 				}
 				// Remark
@@ -232,7 +239,6 @@ public class XmlBuilder
 					currentOccurenceRemarkLine = 0;
 					currentOccurenceNumber++;
 				}
-				
 			}
 			
 			node_block.appendChild(node_occ);
@@ -249,8 +255,7 @@ public class XmlBuilder
 				
 				node = document.createElement("Col_" + 6);
 				node.setAttribute("align", "center");
-				line.calcTotalQuantity();
-				node.setTextContent(String.valueOf(line.getTotalQuantity()));
+				node.setTextContent(String.valueOf(totalQuantity));
 				node_occ.appendChild(node);
 				currentLineNum++;
 				node_block.appendChild(node_occ);
@@ -258,117 +263,9 @@ public class XmlBuilder
 		}
 	}
 	
-	public void addAssyOrKitLine(ReportLine line)
+	public void addDocumentLine(ReportLineXMLRepresentation line)
 	{
-		ReportLineOccurence currentOccurence;
-		int lineHeight = line.lineHeight;
-		int occurencesHeight = 1;
-		for(ReportLineOccurence occurence:line.occurences) occurencesHeight+=calcOccurenceHeight(occurence);
-		int totalHeight = lineHeight>occurencesHeight?lineHeight:occurencesHeight;
-		
-		for(int i = 0; i < line.lineHeight; i++)
-		{
-			node_occ = document.createElement("Occurrence");
-			if(i==0)
-			{
-				node = document.createElement("Col_" + 1);
-				node.setAttribute("align", "center");
-				node.setTextContent(String.valueOf(currentLineNum));
-				node_occ.appendChild(node);
-				
-				node = document.createElement("Col_" + 2);
-				node.setAttribute("align", "left");
-				node.setTextContent(line.id);
-				node_occ.appendChild(node);
-				
-				currentOccurence = line.occurences.get(0);
-				int currentOccurenceHeight = calcOccurenceHeight(currentOccurence);
-				
-				if(!line.id.equals(report.targetId) && currentOccurence.getParentId().equals(report.targetId)){
-					node = document.createElement("Col_" + 4);
-					node.setAttribute("align", "left");
-					node.setTextContent(currentOccurence.getParentId());
-					node_occ.appendChild(node);
-					
-					node = document.createElement("Col_" + 5);
-					node.setAttribute("align", "center");
-					node.setTextContent(String.valueOf(currentOccurence.quantity));
-					node_occ.appendChild(node);
-				}
-				
-				node = document.createElement("Col_" + 6);
-				node.setAttribute("align", "center");
-				node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
-				node_occ.appendChild(node);
-				
-				for(String remarkLine : currentOccurence.remarkLines){
-					node = document.createElement("Col_" + 7);
-					node.setAttribute("align", "left");
-					node.setTextContent(remarkLine);
-					node_occ.appendChild(node);
-				}
-				
-			}
-			node = document.createElement("Col_" + 3);
-			node.setAttribute("align", "left");
-			node.setTextContent(line.nameLines.get(i));
-			node_occ.appendChild(node);
-
-			node_block.appendChild(node_occ);
-		}
-		currentLineNum++;
-
-		if(line.occurences.size()>1){
-			for(int i = 1; i < line.occurences.size(); i++)
-			{
-				node_occ = document.createElement("Occurrence");
-
-				currentOccurence = line.occurences.get(i);
-				
-				node = document.createElement("Col_" + 4);
-				node.setAttribute("align", "left");
-				node.setTextContent(currentOccurence.getParentId());
-				node_occ.appendChild(node);
-				
-				node = document.createElement("Col_" + 5);
-				node.setAttribute("align", "center");
-				node.setTextContent(String.valueOf(currentOccurence.quantity));
-				node_occ.appendChild(node);
-				
-				node = document.createElement("Col_" + 6);
-				node.setAttribute("align", "center");
-				node.setTextContent(String.valueOf(currentOccurence.calcTotalQuantity().getTotalQuantity()));
-				node_occ.appendChild(node);
-				
-				node = document.createElement("Col_" + 7);
-				node.setAttribute("align", "left");
-				node.setTextContent(currentOccurence.remark);
-				node_occ.appendChild(node);
-				
-				node_block.appendChild(node_occ);
-			}
-			
-			node_occ = document.createElement("Occurrence");
-			
-			node = document.createElement("Col_" + 1);
-			node.setAttribute("align", "center");
-			node.setTextContent(String.valueOf(currentLineNum));
-			node_occ.appendChild(node);
-			
-			node = document.createElement("Col_" + 6);
-			node.setAttribute("align", "center");
-			line.calcTotalQuantity();
-			node.setTextContent(String.valueOf(line.getTotalQuantity()));
-			node_occ.appendChild(node);
-			
-			node_block.appendChild(node_occ);
-			currentLineNum++;
-		}
-	}
-	
-	public void addDocumentLine(ReportLine line)
-	{
-		int lineHeight = line.lineHeight;
+		int lineHeight = line.getLineHeight();
 		//node_occ = document.createElement("Occurrence");
 		for(int i = 0; i < lineHeight; i++)
 		{
@@ -399,16 +296,6 @@ public class XmlBuilder
 		}
 	}
 	
-	public int calcLineHeight(ReportLine line)
-	{
-		return line.calcLineHeight(configuration.columnLengths.get(FormField.NAME));
-	}
-	
-	public int calcOccurenceHeight(ReportLineOccurence occurence)
-	{
-		return occurence.calcLineHeight(configuration.columnLengths.get(FormField.REMARK));
-	}
-	
 	public void newPage()
 	{
 		addEmptyLines(getFreeLinesNum());
@@ -416,6 +303,46 @@ public class XmlBuilder
 		node_root.appendChild(node_block);
 		currentPageNum += 1;
 		addEmptyLines(1);
+	}
+	
+	public void addBasicLine(BasicXmlLine line)
+	{
+		// Line number
+		node = document.createElement("Col_" + 1);
+		node.setAttribute("align", "center");
+		node.setTextContent(String.valueOf(currentLineNum));
+		node_occ.appendChild(node);
+		currentLineNum++;
+		// Id of the line
+		node = document.createElement("Col_" + 2);
+		node.setAttribute("align", "left");
+		node.setTextContent(line.getAttribute(FormField.ID));
+		node_occ.appendChild(node);
+		// Name
+		node = document.createElement("Col_" + 3);
+		node.setAttribute("align", "left");
+		node.setTextContent(line.getAttribute(FormField.NAME));
+		node_occ.appendChild(node);
+		// Parent Id
+		node = document.createElement("Col_" + 4);
+		node.setAttribute("align", "center");
+		node.setTextContent(line.getAttribute(FormField.PARENTID));
+		node_occ.appendChild(node);
+		// Quantity
+		node = document.createElement("Col_" + 5);
+		node.setAttribute("align", "left");
+		node.setTextContent(line.getAttribute(FormField.QUANTITY));
+		node_occ.appendChild(node);
+		// TotalQuantity
+		node = document.createElement("Col_" + 6);
+		node.setAttribute("align", "left");
+		node.setTextContent(line.getAttribute(FormField.TOTALQUANTITY));
+		node_occ.appendChild(node);
+		// Remark
+		node = document.createElement("Col_" + 7);
+		node.setAttribute("align", "left");
+		node.setTextContent(line.getAttribute(FormField.REMARK));
+		node_occ.appendChild(node);
 	}
 	
 	public void addEmptyLines(int num)

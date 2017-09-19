@@ -20,10 +20,10 @@ import com.teamcenter.services.rac.cad._2007_01.StructureManagement.ExpandPSOneL
 import com.teamcenter.services.rac.cad._2007_01.StructureManagement.ExpandPSOneLevelPref;
 import com.teamcenter.services.rac.cad._2007_01.StructureManagement.ExpandPSOneLevelResponse;
 
+import ru.idealplm.vsp.oceanos.data.ReportLineOccurence;
 import ru.idealplm.vsp.oceanos.data.ReportLine;
 import ru.idealplm.vsp.oceanos.data.ReportLine.ReportLineType;
 import ru.idealplm.vsp.oceanos.data.ReportLineList;
-import ru.idealplm.vsp.oceanos.data.ReportLineOccurence;
 import ru.idealplm.vsp.oceanos.handlers.VSPHandler;
 import ru.idealplm.vsp.oceanos.util.DateUtil;
 
@@ -37,18 +37,9 @@ public class DataReader
 	private String blPropertyNames[] = {"bl_item_object_type", "bl_Part_oc9_TypeOfPart", "bl_quantity", "bl_item_item_id", "Oc9_Note"};
 	private String blPropertyValues[];
 	private TCComponent document;
+	private ReportLine emptyLine;
 	private ReportLineOccurence emptyOccurence;
 	private ReportLineOccurence topOccurence;
-	private int level = 0;
-	
-	private String tab(int level)
-	{
-		StringBuilder builder = new StringBuilder();
-		for(int i = 0; i < level; i++){
-			builder.append("\t");
-		}
-		return builder.toString();
-	}
 	
 	public DataReader(VSP vsp)
 	{
@@ -56,7 +47,10 @@ public class DataReader
 		this.stampData = vsp.report.stampData;
 		pd = vsp.progressMonitor;
 		lineList = vsp.report.linesList;
-		emptyOccurence = new ReportLineOccurence(null, null);
+		emptyLine = new ReportLine(ReportLineType.NONE, "");
+		emptyOccurence = new ReportLineOccurence(emptyLine, null);
+		emptyLine.addOccurence(emptyOccurence);
+		topOccurence = readBomLineData(VSP.topBOMLine, emptyOccurence);
 	}
 	
 	public void readExistingData()
@@ -67,23 +61,6 @@ public class DataReader
 		readSpecifiedItemData();
 	}
 	
-	public void calculateQuantities(ReportLineOccurence occurence)
-	{
-		System.out.println(tab(level)+"WORKING WITH " + occurence.reportLine.name + " ,current q=" + occurence.quantity + " m=" + occurence.quantityMult);
-		occurence.calcTotalQuantity();
-		for(ReportLineOccurence childOccurence : occurence.children)
-		{
-			System.out.println(tab(level)+"SETTING QUANTITYMULT " + occurence.quantity + " FOR " + childOccurence.reportLine.name);
-			childOccurence.quantityMult = occurence.getTotalQuantity();
-		}
-		level++;
-		for(ReportLineOccurence childOccurence : occurence.children)
-		{
-			calculateQuantities(childOccurence);
-		}
-		level--;
-	}
-	
 	public void readData()
 	{
 		try
@@ -92,10 +69,8 @@ public class DataReader
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
 					monitor.beginTask("Чтение данных", 100);
-					ReportLineOccurence currentOccurence = readBomLineData(VSP.topBOMLine, emptyOccurence);
-					topOccurence = currentOccurence;
-					readBomData(VSP.topBOMLine, currentOccurence, emptyOccurence, monitor);
-					calculateQuantities(topOccurence);
+					readBomData(VSP.topBOMLine, topOccurence, emptyOccurence, monitor);
+					printData();
 					monitor.done();
 				}
 			});
@@ -110,37 +85,23 @@ public class DataReader
 			System.out.println(ex.getMessage());
 		}
 	}
-	
-	private void readBomData(TCComponentBOMLine bomLine, ReportLineOccurence currentOccurence, ReportLineOccurence parentOccurence, IProgressMonitor monitor)
+
+	private void readBomData(TCComponentBOMLine parentBomLine, ReportLineOccurence currentOccurence, ReportLineOccurence parentOccurence, IProgressMonitor monitor)
 	{
 		ReportLineOccurence tempOccurence;
 		if(currentOccurence==null) return;
-		ExpandPSOneLevelInfo levelInfo = new ExpandPSOneLevelInfo();
-		ExpandPSOneLevelPref levelPref = new ExpandPSOneLevelPref();
 
-		levelInfo.parentBomLines = new TCComponentBOMLine[] { bomLine };
-		levelInfo.excludeFilter = "None";
-		levelPref.expItemRev = true;
-
-		ExpandPSOneLevelResponse levelResp = smsService.expandPSOneLevel(levelInfo, levelPref);
-
-		if (levelResp.output.length > 0)
+		for (TCComponentBOMLine bomLine : getChildBOMLines(parentBomLine))
 		{
-			for (ExpandPSOneLevelOutput levelOut : levelResp.output)
-			{
-				for (ExpandPSData psData : levelOut.children)
-				{
-					tempOccurence = readBomLineData(psData.bomLine, currentOccurence);
-					if(tempOccurence!=null)
-						currentOccurence.addChildOccurence(tempOccurence);
-					checkIfMonitorIsCancelled(monitor);
-				}
-			}
-			for(ReportLineOccurence child : currentOccurence.children)
-			{
-				readBomData(child.bomLine, child, currentOccurence, monitor);
-				checkIfMonitorIsCancelled(monitor);
-			}
+			tempOccurence = readBomLineData(bomLine, currentOccurence);
+			if(tempOccurence!=null)
+				currentOccurence.addChild(tempOccurence);
+			checkIfMonitorIsCancelled(monitor);
+		}
+		for(ReportLineOccurence child : currentOccurence.getChildren())
+		{
+			readBomData(child.bomLine, child, currentOccurence, monitor);
+			checkIfMonitorIsCancelled(monitor);
 		}
 	}
 	
@@ -153,7 +114,6 @@ public class DataReader
 			boolean hasValidType = hasValidType(blPropertyValues[0], blPropertyValues[1]);
 			if(hasValidType)
 			{
-				printBOMLineInfo(bomLine);
 				resultOccurence = processLine(bomLine, parentOccurence);
 			}
 		} catch (TCException ex)
@@ -193,10 +153,10 @@ public class DataReader
 			if(line.type==ReportLineType.DOCUMENT) line.name = "Ведомость спецификаций\n"+line.name;
 			System.out.println("new line for "+line.name);
 			resultOccurence = new ReportLineOccurence(line, parentOccurence);
-			resultOccurence.quantity = quantity;
+			resultOccurence.setQuantity(quantity);
 			resultOccurence.bomLine = bomLine;
 			resultOccurence.remark = blPropertyValues[4];
-			line.occurences.add(resultOccurence);
+			line.addOccurence(resultOccurence);
 			lineList.addLine(line);
 		} catch (Exception ex) 
 		{
@@ -211,12 +171,42 @@ public class DataReader
 		int quantity = blPropertyValues[2].trim().isEmpty()?1:Integer.parseInt(blPropertyValues[2]);
 		ReportLine line = lineList.getLine(document.getUid());
 		resultOccurence = new ReportLineOccurence(line, parentOccurence);
-		//parentOccurence.addChildOccurence(resultOccurence);
-		resultOccurence.quantity = quantity;
+		resultOccurence.setQuantity(quantity);
 		resultOccurence.bomLine = bomLine;
 		resultOccurence.remark = blPropertyValues[4];
-		line.occurences.add(resultOccurence);
+		line.updateOccurence(resultOccurence);
 		return resultOccurence;
+	}
+	
+	
+	private TCComponentBOMLine[] getChildBOMLines(TCComponentBOMLine parent)
+	{
+		TCComponentBOMLine[] childLines = null;
+		
+		ExpandPSOneLevelInfo levelInfo = new ExpandPSOneLevelInfo();
+		ExpandPSOneLevelPref levelPref = new ExpandPSOneLevelPref();
+
+		levelInfo.parentBomLines = new TCComponentBOMLine[] { parent };
+		levelInfo.excludeFilter = "None";
+		levelPref.expItemRev = true;
+
+		ExpandPSOneLevelResponse levelResp = smsService.expandPSOneLevel(levelInfo, levelPref);
+
+		if (levelResp.output.length > 0)
+		{
+			for (ExpandPSOneLevelOutput levelOut : levelResp.output)
+			{
+				childLines = new TCComponentBOMLine[levelOut.children.length];
+				for (int i=0; i<levelOut.children.length; i++)
+				{
+					childLines[i] = levelOut.children[i].bomLine;
+				}
+			}
+		}
+		
+		if(childLines==null) childLines = new TCComponentBOMLine[0];
+		
+		return childLines;
 	}
 	
 	public boolean hasValidType(String itemType, String partType)
@@ -248,19 +238,6 @@ public class DataReader
 			ex.printStackTrace();
 		}
 		return type;
-	}
-	
-	public void printBOMLineInfo(TCComponentBOMLine line)
-	{
-		try {
-			String values[] = line.getProperties(blPropertyNames);
-			StringBuilder stringBuilder = new StringBuilder();
-			for(int i = 0; i < values.length; i++) {
-				stringBuilder.append(values[i] + "   ");
-			}
-		} catch (TCException ex) {
-			ex.printStackTrace();
-		}
 	}
 	
 	public TCComponent getRelatedDocument(TCComponentItemRevision rev)
@@ -348,7 +325,6 @@ public class DataReader
 		try {
 			stampData.id = VSP.topBOMLineI.getProperty("item_id") + " ВС";
 			stampData.name = VSP.topBOMLineIR.getProperty("object_name");
-			//Specification.settings.addStringProperty("AddedText", bomLine.getItemRevision().getProperty("oc9_AddNote").trim().equals("")?null:bomLine.getItemRevision().getProperty("oc9_AddNote").trim());
 		} catch (Exception ex){
 			ex.printStackTrace();
 		}
@@ -359,6 +335,18 @@ public class DataReader
 		if (monitor.isCanceled())
 		{
 			throw new CancellationException("Чтение данных было отменено");
+		}
+	}
+	
+	private void printData()
+	{
+		for(ReportLine line : lineList.getSortedList())
+		{
+			System.out.println("line " + line.name);
+			for(ReportLineOccurence occurence : line.occurences())
+			{
+				System.out.println("occurence " + occurence.getParentItemId());
+			}
 		}
 	}
 }

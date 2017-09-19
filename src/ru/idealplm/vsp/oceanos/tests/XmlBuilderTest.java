@@ -3,17 +3,19 @@ package ru.idealplm.vsp.oceanos.tests;
 import java.io.File;
 import java.io.InputStream;
 
+import org.eclipse.ui.internal.dialogs.EmptyPropertyPage;
+
 import ru.idealplm.vsp.oceanos.core.Report;
 import ru.idealplm.vsp.oceanos.core.Report.ReportType;
-import ru.idealplm.vsp.oceanos.data.ReportLine;
-import ru.idealplm.vsp.oceanos.data.ReportLine.ReportLineType;
+import ru.idealplm.vsp.oceanos.data.ReportLineOccurence;
 import ru.idealplm.vsp.oceanos.excel.ExcelReportBuilder;
 import ru.idealplm.vsp.oceanos.xml.PDFReportBuilder;
 import ru.idealplm.vsp.oceanos.xml.PDFReportBuilderConfiguration;
 import ru.idealplm.vsp.oceanos.xml.XmlBuilder;
 import ru.idealplm.vsp.oceanos.xml.XmlBuilderConfiguration;
+import ru.idealplm.vsp.oceanos.data.ReportLine;
+import ru.idealplm.vsp.oceanos.data.ReportLine.ReportLineType;
 import ru.idealplm.vsp.oceanos.data.ReportLineList;
-import ru.idealplm.vsp.oceanos.data.ReportLineOccurence;
 
 public class XmlBuilderTest
 {
@@ -27,7 +29,8 @@ public class XmlBuilderTest
 		list = new ReportLineList();
 		report.linesList = list;
 		report.type = ReportType.PDF;
-		report.targetId = "ААА.000.001";
+		report.targetId = "AAA.000.001";
+		report.stampData.id = report.targetId;
 	}
 	
 	public static void main(String argc[])
@@ -40,43 +43,48 @@ public class XmlBuilderTest
 	public void prepareData()
 	{
 		System.out.println("preparing data...");
-		ReportLine sborka1 = new ReportLine(ReportLineType.ASSEMBLY, "Сборка1");
-		ReportLine sborka2 = new ReportLine(ReportLineType.ASSEMBLY, "Сборка2");
-		ReportLine sborka3 = new ReportLine(ReportLineType.ASSEMBLY, "Сборка3");
-		ReportLine sborka4 = new ReportLine(ReportLineType.ASSEMBLY, "Сборка4");
-		ReportLine kit1 = new ReportLine(ReportLineType.KIT, "Комплект1");
+		ReportLine sborka1 = new ReportLine(ReportLineType.ASSEMBLY, "РЎР±РѕСЂРєР°1");
+		ReportLine sborka2 = new ReportLine(ReportLineType.ASSEMBLY, "РЎР±РѕР»РєР°2");
+		ReportLine sborka3 = new ReportLine(ReportLineType.ASSEMBLY, "РЎР±РѕСЂРєР°3");
+		ReportLine sborka4 = new ReportLine(ReportLineType.ASSEMBLY, "РЎР±РѕСЂРєР°4");
+		ReportLine sborka5 = new ReportLine(ReportLineType.ASSEMBLY, "РЎР±РѕСЂРєР°5");
+		ReportLine kit1 = new ReportLine(ReportLineType.KIT, "РљРѕРјРїР»РµРєС‚1");
 		
-		ReportLineOccurence emptyOccurence = new ReportLineOccurence(null, null);
+		ReportLine emptyLine = new ReportLine(ReportLineType.NONE, "");
+		ReportLineOccurence emptyOccurence = new ReportLineOccurence(emptyLine, null);
 		sborka1o1 = new ReportLineOccurence(sborka1, emptyOccurence);
-		ReportLineOccurence sborka2o1 = new ReportLineOccurence(sborka2, sborka1o1);
-		ReportLineOccurence sborka3o1 = new ReportLineOccurence(sborka3, sborka1o1);
-		ReportLineOccurence sborka4o1 = new ReportLineOccurence(sborka4, sborka1o1);
-		ReportLineOccurence sborka2o2 = new ReportLineOccurence(sborka2, sborka4o1);
-		ReportLineOccurence kit1o1 = new ReportLineOccurence(kit1, sborka1o1);
+		sborka1.addOccurence(sborka1o1);
 		
-		sborka1.id = "ААА.000.001";
-		sborka1.occurences.add(sborka1o1);
+		ReportLineOccurence sborka2o1 = new ReportLineOccurence(sborka2, sborka1o1);
+		sborka2.addOccurence(sborka2o1);
+		
+		ReportLineOccurence sborka3o1 = new ReportLineOccurence(sborka3, sborka1o1);
+		sborka3.addOccurence(sborka3o1);
+		
+		ReportLineOccurence sborka4o1 = new ReportLineOccurence(sborka4, sborka1o1);
+		sborka4.addOccurence(sborka4o1);
+		
+		ReportLineOccurence sborka2o2 = new ReportLineOccurence(sborka2, sborka4o1);
+		sborka2.addOccurence(sborka2o2);
+		
+		ReportLineOccurence kit1o1 = new ReportLineOccurence(kit1, sborka1o1);
+		kit1.addOccurence(kit1o1);
+		
+		sborka1.id = "РђРђРђ.000.001";
 		sborka1.uid = "1";
-		sborka2.id = "ААА.000.002";
-		sborka2.occurences.add(sborka2o1);
-		sborka2.occurences.add(sborka2o2);
+		sborka2.id = "РђРђРђ.000.002";
 		sborka2.uid = "2";
-		sborka3.id = "ААА.000.003";
-		sborka3.occurences.add(sborka3o1);
+		sborka3.id = "РђРђРђ.000.003";
 		sborka3.uid = "3";
-		sborka4.id = "ААА.000.004";
-		sborka4.occurences.add(sborka4o1);
+		sborka4.id = "РђРђРђ.000.004";
 		sborka4.uid = "4";
-		kit1.id = "KKK.000.001";
-		kit1.occurences.add(kit1o1);
+		kit1.id = "РљРљРљ.000.001";
 		kit1.uid = "5";
 		
-		sborka2o1.quantity = 2;
-		sborka2o1.quantityMult = sborka1o1.getTotalQuantity();
-		sborka4o1.quantity = 2;
-		sborka4o1.quantityMult = sborka1o1.getTotalQuantity();
-		sborka2o2.quantity = 2;
-		sborka2o2.quantityMult = sborka4o1.getTotalQuantity();
+		sborka1o1.quantity = 1;
+		sborka2o1.setQuantity(2);
+		sborka4o1.setQuantity(2);
+		sborka2o2.setQuantity(2);
 		sborka2o1.remark="1";
 		
 		list.addLine(sborka1);
@@ -85,47 +93,22 @@ public class XmlBuilderTest
 		list.addLine(sborka4);
 		list.addLine(kit1);
 		
-		prepareLongData();
 		prepareDocumentData();
-	}
-	
-	public void prepareLongData()
-	{
-		ReportLine sborka8 = new ReportLine(ReportLineType.ASSEMBLY, "Сборка8");
-		ReportLine sborka9 = new ReportLine(ReportLineType.ASSEMBLY, "ШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШ");
-		
-		ReportLineOccurence sborka8o1 = new ReportLineOccurence(sborka8, sborka1o1);
-		ReportLineOccurence sborka9o1 = new ReportLineOccurence(sborka9, sborka1o1);
-		ReportLineOccurence sborka9o2 = new ReportLineOccurence(sborka9, sborka8o1);
-		
-		//sborka9o1.remark = "ШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШ";
-		sborka9o2.remark = "ШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШШ";
-		
-		sborka8.id = "ААА.000.008";
-		sborka8.occurences.add(sborka8o1);
-		sborka8.uid = "8";
-		sborka9.id = "ААА.000.009";
-		sborka9.occurences.add(sborka9o1);
-		sborka9.occurences.add(sborka9o2);
-		sborka9.uid = "9";
-		
-		list.addLine(sborka8);
-		list.addLine(sborka9);
 	}
 	
 	public void prepareDocumentData()
 	{
-		ReportLine document10 = new ReportLine(ReportLineType.DOCUMENT, "Ведомость спецификаций\nДокумент10 ВС");
-		ReportLine document11 = new ReportLine(ReportLineType.DOCUMENT, "Ведомость спецификаций\nДокумент11 ВС");
+		ReportLine document10 = new ReportLine(ReportLineType.DOCUMENT, "Р”РѕРєСѓРјРµРЅС‚1\n1 Р’РЎ");
+		ReportLine document11 = new ReportLine(ReportLineType.DOCUMENT, "Р”РѕРєСѓРјРµРЅС‚2\n2 Р’РЎ");
 		
 		ReportLineOccurence document1o1 = new ReportLineOccurence(document10, sborka1o1);
+		document10.addOccurence(document1o1);
 		ReportLineOccurence document2o2 = new ReportLineOccurence(document11, sborka1o1);
+		document11.addOccurence(document2o2);
 		
-		document10.id = "ААА.000.010";
-		document10.occurences.add(document1o1);
+		document10.id = "Р”Р”Р”.000.010";
 		document10.uid = "10";
-		document11.id = "ААА.000.011";
-		document11.occurences.add(document2o2);
+		document11.id = "Р”Р”Р”.000.011";
 		document11.uid = "11";
 		
 		list.addLine(document10);
