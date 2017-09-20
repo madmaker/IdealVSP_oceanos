@@ -1,10 +1,15 @@
 package ru.idealplm.vsp.oceanos.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+
+import ru.idealplm.vsp.oceanos.core.ReportLineOccurencesComparator;
 
 public class ReportLine
 {
+	private static ReportLineOccurencesComparator reportLineOccurencessComparator = new ReportLineOccurencesComparator();
+	
 	public enum ReportLineType {
 		NONE, ASSEMBLY, KIT, DOCUMENT
 	};
@@ -26,7 +31,8 @@ public class ReportLine
 	
 	public final ArrayList<ReportLineOccurence> occurences()
 	{
-		final ArrayList<ReportLineOccurence> lines = new ArrayList<ReportLineOccurence>(occurences.values());
+		ArrayList<ReportLineOccurence> lines = new ArrayList<ReportLineOccurence>(occurences.values());
+		Collections.sort(lines, reportLineOccurencessComparator);
 		return lines;
 	}
 	

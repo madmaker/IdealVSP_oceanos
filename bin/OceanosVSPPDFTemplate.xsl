@@ -210,7 +210,7 @@
                 <xsl:call-template name="Real_Signatures"/>
            </fo:block-container-->
 		   <xsl:if test="contains($ShowAdditionalForm,'true')">
-			   <fo:block-container position="absolute" top="-60.25mm" left="349.75mm" right="0mm" height="15mm">
+			   <fo:block-container position="absolute" top="-63.25mm" left="289.75mm" right="0mm" height="15mm">
 					<xsl:call-template name="Real_Signatures"/>
 			   </fo:block-container>
 		   </xsl:if>
@@ -487,27 +487,17 @@
 
 <xsl:template name="Real_Signatures">
     <fo:table table-layout="fixed" font-style="normal" width="30%" border-collapse="collapse" background-color="#ffffff">
-      <fo:table-column column-width="15mm"/>
-      <fo:table-column column-width="30mm"/>
-      <fo:table-column column-width="15mm"/>
+      <fo:table-column column-width="14mm"/>
+      <fo:table-column column-width="53mm"/>
+      <fo:table-column column-width="53mm"/>
               <fo:table-body  border-width="0.5mm 0.5mm 0.5mm 0.5mm">
-                 <fo:table-row  height="4.5mm" border-width="0.5mm">
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid" number-columns-spanned="3"><fo:block text-align="center" font-style="italic" margin-top="0.5mm" font-size="3mm">Подлинные подписи</fo:block></fo:table-cell>
+                 <fo:table-row  height="14mm" border-width="0.5mm">
+					<fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
+					<fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
+					<fo:table-cell border-width="0.5mm" border-style="solid"><fo:block/></fo:table-cell>
                  </fo:table-row>
-                 <fo:table-row  height="4.5mm" border-width="0.5mm">
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block text-align="center" font-style="italic" margin-top="0.5mm" font-size="3mm">Разраб.</fo:block></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
-                 </fo:table-row>
-                 <fo:table-row  height="4.5mm" border-width="0.5mm">
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block text-align="center" font-style="italic" margin-top="0.5mm" font-size="3mm">Пров.</fo:block></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
-                 </fo:table-row>
-                 <fo:table-row  height="4.5mm" border-width="0.5mm">
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block text-align="center" font-style="italic" margin-top="0.5mm" font-size="3mm">Н. контр.</fo:block></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
-                   <fo:table-cell border-width='from-parent(border-width)' border-style="solid"><fo:block/></fo:table-cell>
+                 <fo:table-row  height="8mm" border-width="0.5mm">
+					<fo:table-cell border-width="0.5mm" border-style="solid" number-columns-spanned="3"><fo:block/></fo:table-cell>
                  </fo:table-row>
                  
               </fo:table-body>
