@@ -157,6 +157,8 @@ public class XmlBuilder
 		}
 		
 		node_root.appendChild(node_block);
+		
+		if(getFreeLinesNum()>0) addEmptyLines(getFreeLinesNum());
 	}
 	
 	public void addAssyOrKitLine2(ReportLineXMLRepresentation line)
@@ -186,7 +188,6 @@ public class XmlBuilder
 				node.setAttribute("align", "center");
 				node.setTextContent(String.valueOf(currentLineNum));
 				node_occ.appendChild(node);
-				currentLineNum++;
 				// Id of the line
 				node = document.createElement("Col_" + 2);
 				node.setAttribute("align", "left");
@@ -198,6 +199,11 @@ public class XmlBuilder
 				node.setTextContent(line.nameLines.get(i));
 				node_occ.appendChild(node);
 			} else if (lineHeight>i && lineHeight <= totalHeight) {
+				// Line number
+				node = document.createElement("Col_" + 1);
+				node.setAttribute("align", "center");
+				node.setTextContent(String.valueOf(currentLineNum));
+				node_occ.appendChild(node);
 				System.out.println("new line for name");
 				// If line name takes multiple lines, we print it
 				node = document.createElement("Col_" + 3);
@@ -211,6 +217,11 @@ public class XmlBuilder
 				//Occurence first line info
 				if(currentOccurenceRemarkLine==0)
 				{
+					// Line number
+					node = document.createElement("Col_" + 1);
+					node.setAttribute("align", "center");
+					node.setTextContent(String.valueOf(currentLineNum));
+					node_occ.appendChild(node);
 					//Parent id
 					node = document.createElement("Col_" + 4);
 					node.setAttribute("align", "left");
@@ -227,6 +238,11 @@ public class XmlBuilder
 					node.setTextContent(String.valueOf(currentOccurence.occurence.totalQuantity));
 					node_occ.appendChild(node);
 				}
+				// Line number
+				node = document.createElement("Col_" + 1);
+				node.setAttribute("align", "center");
+				node.setTextContent(String.valueOf(currentLineNum));
+				node_occ.appendChild(node);
 				// Remark
 				node = document.createElement("Col_" + 7);
 				node.setAttribute("align", "left");
@@ -246,20 +262,21 @@ public class XmlBuilder
 			//If it is the last line
 			if(i==(totalHeight-1) && line.occurences.size()>1)
 			{
-				System.out.println("YEAHHH!");
+				currentLineNum++;
+				// Line number
 				node_occ = document.createElement("Occurrence");
 				node = document.createElement("Col_" + 1);
 				node.setAttribute("align", "center");
 				node.setTextContent(String.valueOf(currentLineNum));
 				node_occ.appendChild(node);
-				
+				// Total quantity
 				node = document.createElement("Col_" + 6);
 				node.setAttribute("align", "center");
 				node.setTextContent(String.valueOf(totalQuantity));
 				node_occ.appendChild(node);
-				currentLineNum++;
 				node_block.appendChild(node_occ);
 			}
+			currentLineNum++;
 		}
 	}
 	
@@ -278,14 +295,17 @@ public class XmlBuilder
 				node.setAttribute("align", "center");
 				node.setTextContent(String.valueOf(currentLineNum));
 				node_occ.appendChild(node);
-				currentLineNum++;
 				// Name
 				node = document.createElement("Col_" + 3);
 				node.setAttribute("align", "left");
 				node.setTextContent(line.nameLines.get(i));
 				node_occ.appendChild(node);
 			} else {
-				System.out.println("new line for name");
+				// Line number
+				node = document.createElement("Col_" + 1);
+				node.setAttribute("align", "center");
+				node.setTextContent(String.valueOf(currentLineNum));
+				node_occ.appendChild(node);
 				// If line name takes multiple lines, we print it
 				node = document.createElement("Col_" + 3);
 				node.setAttribute("align", "left");
@@ -293,6 +313,7 @@ public class XmlBuilder
 				node_occ.appendChild(node);
 			}
 			node_block.appendChild(node_occ);
+			currentLineNum++;
 		}
 	}
 	
@@ -301,6 +322,7 @@ public class XmlBuilder
 		addEmptyLines(getFreeLinesNum());
 		node_block = document.createElement("Block");
 		node_root.appendChild(node_block);
+		currentLineNum = 1;
 		currentPageNum += 1;
 		addEmptyLines(1);
 	}
@@ -312,7 +334,6 @@ public class XmlBuilder
 		node.setAttribute("align", "center");
 		node.setTextContent(String.valueOf(currentLineNum));
 		node_occ.appendChild(node);
-		currentLineNum++;
 		// Id of the line
 		node = document.createElement("Col_" + 2);
 		node.setAttribute("align", "left");
@@ -343,6 +364,7 @@ public class XmlBuilder
 		node.setAttribute("align", "left");
 		node.setTextContent(line.getAttribute(FormField.REMARK));
 		node_occ.appendChild(node);
+		currentLineNum++;
 	}
 	
 	public void addEmptyLines(int num)
@@ -351,9 +373,14 @@ public class XmlBuilder
 			if(getFreeLinesNum() <= 0){
 				newPage();
 			}
-			//currentLineNum++;
 			node_occ = document.createElement("Occurrence");
+			// Line number
+			node = document.createElement("Col_" + 1);
+			node.setAttribute("align", "center");
+			node.setTextContent(String.valueOf(currentLineNum));
+			node_occ.appendChild(node);
 			node_block.appendChild(node_occ);
+			currentLineNum++;
 		}
 	}
 	

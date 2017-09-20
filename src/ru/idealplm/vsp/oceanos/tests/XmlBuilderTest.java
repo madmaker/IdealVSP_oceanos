@@ -120,7 +120,7 @@ public class XmlBuilderTest
 		System.out.println("writing data...");
 		if(report.type == ReportType.PDF)
 		{
-			XmlBuilderConfiguration A4xmlBuilderConfiguration = new XmlBuilderConfiguration(26, 32);
+			XmlBuilderConfiguration A4xmlBuilderConfiguration = new XmlBuilderConfiguration(24, 29);
 			A4xmlBuilderConfiguration.MaxWidthGlobalRemark = 474;
 
 			XmlBuilder xmlBuilder = new XmlBuilder(A4xmlBuilderConfiguration, report);
