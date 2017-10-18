@@ -124,11 +124,11 @@
 
 
         <fo:static-content flow-name="first-region-before">
-           <!--fo:block-container top="1mm" position="absolute">
-           <fo:block font-family="Arial" text-align="right" font-size="3mm">
-             <fo:inline font-style ="normal"></fo:inline>
-           </fo:block>
-           </fo:block-container-->
+           <fo:block-container top="1mm" position="absolute">
+               <fo:block font-family="arial" text-align="right" font-size="3mm">
+                 <fo:inline font-style="italic">ГОСТ 2.106-68 Форма 3</fo:inline>
+               </fo:block>
+           </fo:block-container>
 		   
 		   <!-- Граница документа сверху - линия толщиной 0.5мм -->
            <!--fo:block-container border-color="green" border-bottom-style="solid" border-bottom="0.5mm" position="absolute" top="0mm" bottom="0mm" left="15mm" right="0mm">
