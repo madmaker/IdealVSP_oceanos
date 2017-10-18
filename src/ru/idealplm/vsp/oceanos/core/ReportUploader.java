@@ -109,8 +109,9 @@ public class ReportUploader
 					VSP.vspIR.add("IMAN_specification", ds_new);
 					saveGeneralNoteFormInfo();
 					
-					ds_new.getFiles("")[0].setReadOnly();
-					Desktop.getDesktop().open(ds_new.getFiles("")[0]);
+					vsp.report.report=renamedReportFile!=null?renamedReportFile:vsp.report.report;
+					//ds_new.getFiles("")[0].setReadOnly();
+					//Desktop.getDesktop().open(ds_new.getFiles("")[0]);
 				}
 			} else {
 				System.out.println("SPEC DATASET IS NOT NULL");
@@ -118,8 +119,9 @@ public class ReportUploader
 				currentVSPDataset.setFiles(new String[] { renamedReportFile!=null?renamedReportFile.getAbsolutePath():vsp.report.report.getAbsolutePath() }, new String[] { dataset_tool });
 				saveGeneralNoteFormInfo();
 				
-				currentVSPDataset.getFiles("")[0].setReadOnly();
-				Desktop.getDesktop().open(currentVSPDataset.getFiles("")[0]);
+				vsp.report.report=renamedReportFile!=null?renamedReportFile:vsp.report.report;
+				//currentVSPDataset.getFiles("")[0].setReadOnly();
+				//Desktop.getDesktop().open(currentVSPDataset.getFiles("")[0]);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -225,9 +227,9 @@ public class ReportUploader
 			
 			for (AIFComponentContext currConetext : relatedComp) {
 				System.out.println("TYPE: " + currConetext.getComponent().getType());
-				if (currConetext.getComponent().getType().equals("Pm8_CompanyPartRevision")) {
+				if (currConetext.getComponent().getType().equals("Oc9_CompanyPartRevision")) {
 					TCComponentItemRevision currItemRev = (TCComponentItemRevision) currConetext.getComponent(); 
-					if (currItemRev.getProperty("pm8_Designation").equals(lastRev.getProperty("item_id")))
+					if (currItemRev.getProperty("item_id").equals(lastRev.getProperty("item_id")))
 						out = true;
 				}
 			}

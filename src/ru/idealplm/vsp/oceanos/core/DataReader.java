@@ -33,7 +33,6 @@ public class DataReader
 	private StampData stampData;
 	private ReportLineList lineList;
 	private StructureManagementService smsService = StructureManagementService.getService(VSPHandler.session);
-	private ProgressMonitorDialog pd;
 	private String blPropertyNames[] = {"bl_item_object_type", "bl_Part_oc9_TypeOfPart", "bl_quantity", "bl_item_item_id", "Oc9_Note"};
 	private String blPropertyValues[];
 	private TCComponent document;
@@ -45,7 +44,6 @@ public class DataReader
 	{
 		this.vsp = vsp;
 		this.stampData = vsp.report.stampData;
-		pd = vsp.progressMonitor;
 		lineList = vsp.report.linesList;
 		emptyLine = new ReportLine(ReportLineType.NONE, "");
 		emptyOccurence = new ReportLineOccurence(emptyLine, null);
@@ -63,30 +61,10 @@ public class DataReader
 	
 	public void readData()
 	{
-		try
-		{
-			pd.run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-				{
-					monitor.beginTask("Чтение данных", 100);
-					readBomData(VSP.topBOMLine, topOccurence, emptyOccurence, monitor);
-					printData();
-					monitor.done();
-				}
-			});
-		}
-		catch (InvocationTargetException | InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		catch (CancellationException ex)
-		{
-			VSPSettings.isCancelled = true;
-			System.out.println(ex.getMessage());
-		}
+		readBomData(VSP.topBOMLine, topOccurence, emptyOccurence);
 	}
 
-	private void readBomData(TCComponentBOMLine parentBomLine, ReportLineOccurence currentOccurence, ReportLineOccurence parentOccurence, IProgressMonitor monitor)
+	private void readBomData(TCComponentBOMLine parentBomLine, ReportLineOccurence currentOccurence, ReportLineOccurence parentOccurence)
 	{
 		ReportLineOccurence tempOccurence;
 		if(currentOccurence==null) return;
@@ -96,12 +74,10 @@ public class DataReader
 			tempOccurence = readBomLineData(bomLine, currentOccurence);
 			if(tempOccurence!=null)
 				currentOccurence.addChild(tempOccurence);
-			checkIfMonitorIsCancelled(monitor);
 		}
 		for(ReportLineOccurence child : currentOccurence.getChildren())
 		{
-			readBomData(child.bomLine, child, currentOccurence, monitor);
-			checkIfMonitorIsCancelled(monitor);
+			readBomData(child.bomLine, child, currentOccurence);
 		}
 	}
 	
@@ -128,13 +104,18 @@ public class DataReader
 		ReportLineOccurence resultOccurence = null;
 		try{
 			document = getRelatedDocument(bomLine.getItemRevision());
-			if(document!=null){
+			if(document!=null)
+			{
 				System.out.println("processing doc="+document.getUid());
 				if(lineList.containsLineWithUid(document.getUid())){
 					resultOccurence = updateExistingLine(bomLine, parentOccurence);
 				} else {
 					resultOccurence = addNewLine(bomLine, parentOccurence);
 				}
+			}
+			else 
+			{
+				VSP.errorList.storeError(new Error(bomLine.getProperty("bl_item_item_id")));
 			}
 		} catch (TCException ex) {
 			ex.printStackTrace();

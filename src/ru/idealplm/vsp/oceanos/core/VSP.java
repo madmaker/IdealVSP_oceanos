@@ -1,6 +1,8 @@
 package ru.idealplm.vsp.oceanos.core;
 
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -36,7 +38,6 @@ public class VSP
 	
 	public static ErrorList errorList;
 
-	public ProgressMonitorDialog progressMonitor;
 	public Report report;
 	private DataReader dataReader;
 	
@@ -110,5 +111,17 @@ public class VSP
 	{
 		ReportUploader uploader = new ReportUploader(this);
 		uploader.addToTeamcenter();
+	}
+	
+	public void openReportFile()
+	{
+		try
+		{
+			Desktop.getDesktop().open(new File(report.report.getAbsolutePath()));
+		} 
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
