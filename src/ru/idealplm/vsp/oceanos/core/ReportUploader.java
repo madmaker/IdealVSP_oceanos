@@ -37,7 +37,10 @@ public class ReportUploader
 {
 	private VSP vsp;
 	private File renamedReportFile = null;
-	public DataManagementService dmService;
+	private DataManagementService dmService;
+	private String reportFullName = "Ведомость спецификаций";
+	private String reportShortName = "ВС";
+	private String format = "A3";
 	
 	public ReportUploader(VSP vsp)
 	{
@@ -46,95 +49,99 @@ public class ReportUploader
 	
 	public void addToTeamcenter()
 	{
-		try{
-			TCComponentDataset currentVSPDataset = null;
+		try
+		{
+			TCComponentDataset currentReportDataset = null;
 			this.dmService = DataManagementService.getService(VSPHandler.session);
 			
-			if(vsp.report.report!=null){
-				try{
-					renamedReportFile = new File(vsp.report.data.getAbsolutePath().substring(0, vsp.report.data.getAbsolutePath().lastIndexOf("_"))+".pdf");
-					Files.deleteIfExists(renamedReportFile.toPath());
-					vsp.report.report.renameTo(renamedReportFile);
-					System.out.println(vsp.report.report.getAbsolutePath());
-					System.out.println(renamedReportFile.getAbsolutePath());
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+			if(vsp.report.report!=null)
+			{
+				renameReportFile();
 			}
-			if(VSP.vspIR != null) {
-				System.out.println("+++++++++++  SPREV!=NULL");
-				currentVSPDataset = deletePrevSpecDatasetOfKd();
-			} else if (VSP.vspIR == null) {
-				System.out.println("+++++++++++  SPREV==NULL");
+			else
+			{
+				throw new Exception("No report file was built.");
+			}
+			
+			if(VSP.vspIR != null)
+			{
+				currentReportDataset = findExistingDataset();
+				deleteDatasetNamedRefs(currentReportDataset);
+			}
+			else if (VSP.vspIR == null)
+			{
 				TCComponentItem kdDoc = findKDDocItem();
-				if (kdDoc == null) {
-					System.out.println("CREATING KD ITEM WITH FIRST ITEMREVISION + SignForm!");
-					TCComponentItemRevision newItemRev = (TCComponentItemRevision)createItem("Oc9_KD", VSP.topBOMLineIR.getProperty("item_id") + " ВС",
+				if (kdDoc == null)
+				{
+					TCComponentItemRevision newItemRev = (TCComponentItemRevision)createItem("Oc9_KD", VSP.topBOMLineIR.getProperty("item_id") + " " + reportShortName,
 							VSP.topBOMLineIR.getProperty("object_name"),
-							"Создано утилитой по генерации документа \"Ведомость спецификаций\"")[1];
+							"Создано утилитой по генерации документа \"" + reportFullName + "\"")[1];
 					VSP.vspIR = newItemRev;
-				} else {
-					System.out.println("+++++++++++  KD!=NULL");
-					System.out.println(kdDoc.getProperty("item_id"));
-					if (isKdLastRevHasAssemblyRev(kdDoc)) {
-						System.out.println("REVISE AND REMOVE SP + SignForm...");
+				}
+				else
+				{
+					if (isKdLastRevHasAssemblyRev(kdDoc))
+					{
 						VSP.vspIR = createNextRevisionBasedOn(getLastRevOfItem(kdDoc));
 						
-						if (VSP.vspIR != null) {
+						if (VSP.vspIR != null)
+						{
 							deleteRelationsToCompanyPart(VSP.vspIR);
-							currentVSPDataset = deletePrevSpecDatasetOfKd();
+							currentReportDataset = findExistingDataset();
+							deleteDatasetNamedRefs(currentReportDataset);
 						}
-					} else {
-						System.out.println("REPLACING LAST REVISION!");
+					}
+					else
+					{
 						VSP.vspIR = kdDoc.getLatestItemRevision();
-						currentVSPDataset = deletePrevSpecDatasetOfKd();
+						currentReportDataset = findExistingDataset();
+						deleteDatasetNamedRefs(currentReportDataset);
 					}
 				}
 				
-				if(VSP.vspIR!=null){
-					VSP.vspIR.setProperty("oc9_Format", "A3");
+				if(VSP.vspIR!=null)
+				{
+					VSP.vspIR.setProperty("oc9_Format", format);
 					VSP.vspIR.lock();
 					VSP.vspIR.save();
 					VSP.vspIR.unlock();
 					VSP.topBOMLine.getItemRevision().add("Oc9_DocRel", new TCComponent[]{VSP.vspIR.getItem()});
 				}
-				//spRev.getItem().("Oc9_DocRel", topBOMLine.getItemRevision());
-				//spRev.setProperty("pm8_Format", finalFormat(page));
 			}
 	
-			if(currentVSPDataset==null){
+			if(currentReportDataset==null)
+			{
 				TCComponentDataset ds_new = createDatasetAndAddFile(vsp.report.report.getAbsolutePath());
-				if (ds_new != null) {
-					System.out.println("Adding to item_id: " + VSP.vspIR.getProperty("item_id"));
+				if (ds_new != null)
+				{
 					VSP.vspIR.add("IMAN_specification", ds_new);
 					saveGeneralNoteFormInfo();
 					
 					vsp.report.report=renamedReportFile!=null?renamedReportFile:vsp.report.report;
-					//ds_new.getFiles("")[0].setReadOnly();
-					//Desktop.getDesktop().open(ds_new.getFiles("")[0]);
 				}
-			} else {
-				System.out.println("SPEC DATASET IS NOT NULL");
+			}
+			else
+			{
 				String dataset_tool = "PDF_Reference";
-				currentVSPDataset.setFiles(new String[] { renamedReportFile!=null?renamedReportFile.getAbsolutePath():vsp.report.report.getAbsolutePath() }, new String[] { dataset_tool });
+				currentReportDataset.setFiles(new String[] { renamedReportFile!=null?renamedReportFile.getAbsolutePath():vsp.report.report.getAbsolutePath() }, new String[] { dataset_tool });
 				saveGeneralNoteFormInfo();
 				
 				vsp.report.report=renamedReportFile!=null?renamedReportFile:vsp.report.report;
-				//currentVSPDataset.getFiles("")[0].setReadOnly();
-				//Desktop.getDesktop().open(currentVSPDataset.getFiles("")[0]);
 			}
-		} catch (Exception ex) {
+		}
+		catch (Exception ex)
+		{
 			ex.printStackTrace();
 		}
 	}
 	
 	private void saveGeneralNoteFormInfo()
 	{
-		try{
+		try
+		{
 			TCComponent tempComp;
 			if((tempComp = VSP.vspIR.getRelatedComponent("Oc9_SignRel"))!=null)
 			{
-				System.out.println("+++++FOUND SIGN FORM!!!!");
 				tempComp.setProperty("oc9_Designer", vsp.report.stampData.design);
 				tempComp.setProperty("oc9_Check", vsp.report.stampData.check);
 				tempComp.setProperty("oc9_TCheck", vsp.report.stampData.techCheck);
@@ -147,23 +154,22 @@ public class ReportUploader
 				tempComp.setProperty("oc9_NCheckDate", vsp.report.stampData.normCheckDate);
 				tempComp.setProperty("oc9_ApproveDate", vsp.report.stampData.approveDate);
 			}
-			/*if(VSP.vspIR.getRelatedComponent("IMAN_master_form_rev")!=null){
-				specIR.getRelatedComponent("IMAN_master_form_rev").setProperty("object_desc", Specification.settings.getStringProperty("blockSettings"));
-			}*/
 			
 			VSP.vspIR.lock();
-			//topBOMLine.getItemRevision().setProperty("oc9_AddNote", Specification.settings.getStringProperty("AddedText"));
 			VSP.vspIR.setProperty("oc9_Litera1", vsp.report.stampData.litera1);
 			VSP.vspIR.setProperty("oc9_Litera2", vsp.report.stampData.litera2);
 			VSP.vspIR.setProperty("oc9_Litera3", vsp.report.stampData.litera3);
 			VSP.vspIR.save();
 			VSP.vspIR.unlock();
-		} catch (Exception ex) {
+		}
+		catch (Exception ex)
+		{
 			ex.printStackTrace();
 		}
 	}
 	
-	private TCComponentItemRevision createNextRevisionBasedOn(TCComponentItemRevision itemRev) {
+	private TCComponentItemRevision createNextRevisionBasedOn(TCComponentItemRevision itemRev)
+	{
 		TCComponentItemRevision out = null;
 		
 		ReviseProperties revProp = new ReviseProperties();
@@ -171,14 +177,10 @@ public class ReportUploader
 		revInfo.baseItemRevision = itemRev;
 		ReviseResponse2 response = dmService.revise2(new ReviseInfo[] {revInfo});
 		
-		System.out.println("MAP SIZE = " + response.reviseOutputMap.size());
 		Iterator it = response.reviseOutputMap.entrySet().iterator();
-		if (it.hasNext()) {
-			System.out.println("trying to return itemRev...");
+		if (it.hasNext())
+		{
 			Map.Entry entry = (Entry) it.next();
-			System.out.println("Class NAME VALUE: " + entry.getValue().getClass().getName() + " = " + entry.getKey()
-					+ "\nClass NAME KEY: " + entry.getKey().getClass().getName()
-					);
 			out = ((ReviseOutput)entry.getValue()).newItemRev;
 		}
 		
@@ -187,10 +189,11 @@ public class ReportUploader
 	
 	@SuppressWarnings("unchecked")
 	private CreateItemsOutput[] createItems(final ItemIdsAndInitialRevisionIds[] itemIds, final String itemType, final String itemName, final String itemDesc)
-			throws TCException {
-//		final GetItemCreationRelatedInfoResponse relatedResponse = BuildSpec2G.dmService.getItemCreationRelatedInfo(itemType, null);
+			throws TCException
+	{
 		final ItemProperties[] itemProps = new ItemProperties[itemIds.length];
-		for (int i = 0; i < itemIds.length; i++) {
+		for (int i = 0; i < itemIds.length; i++)
+		{
 			final ItemProperties itemProperty = new ItemProperties();
 			itemProperty.clientId = VSP.CLIENT_ID;
 			itemProperty.itemId = itemIds[i].newItemId;
@@ -208,8 +211,8 @@ public class ReportUploader
 	}
 	
 	public TCComponent[] createItem(final String type, final String id,
-			final String name, final String desc) throws TCException {
-		
+			final String name, final String desc) throws TCException
+	{
 		final ItemIdsAndInitialRevisionIds[] itemIds = generateItemIds(1, type);
 		final CreateItemsOutput[] newItems = createItems(itemIds, type, name, desc);
 		
@@ -218,15 +221,16 @@ public class ReportUploader
 		return new TCComponent[] { newItems[0].item, newItems[0].itemRev };
 	}
 	
-	private boolean isKdLastRevHasAssemblyRev(TCComponentItem kdDoc) throws TCException {
+	private boolean isKdLastRevHasAssemblyRev(TCComponentItem kdDoc) throws TCException
+	{
 		boolean out = false;
 		TCComponentItemRevision lastRev = getLastRevOfItem(kdDoc);
-		if (lastRev != null) {
+		if (lastRev != null)
+		{
 			AIFComponentContext[] relatedComp = lastRev.getRelated("TC_DrawingOf");
-			System.out.println("got " + relatedComp.length + " Specs from LAST REVISIONS");
 			
-			for (AIFComponentContext currConetext : relatedComp) {
-				System.out.println("TYPE: " + currConetext.getComponent().getType());
+			for (AIFComponentContext currConetext : relatedComp)
+			{
 				if (currConetext.getComponent().getType().equals("Oc9_CompanyPartRevision")) {
 					TCComponentItemRevision currItemRev = (TCComponentItemRevision) currConetext.getComponent(); 
 					if (currItemRev.getProperty("item_id").equals(lastRev.getProperty("item_id")))
@@ -234,12 +238,12 @@ public class ReportUploader
 				}
 			}
 		}
-		System.out.println("IS KD LAST REV HAS ASSEMBLY? >> " + out);
 		return out;
 	}
 	
 	@SuppressWarnings("unchecked")
-	private ItemIdsAndInitialRevisionIds[] generateItemIds(final int numberOfIds, final String type) throws TCException {
+	private ItemIdsAndInitialRevisionIds[] generateItemIds(final int numberOfIds, final String type) throws TCException
+	{
 		final GenerateItemIdsAndInitialRevisionIdsProperties property = new GenerateItemIdsAndInitialRevisionIdsProperties();
 		property.count = numberOfIds;
 		property.itemType = type;
@@ -252,15 +256,15 @@ public class ReportUploader
 		return myNewIds;
 	}
 	
-	private TCComponentDataset createDatasetAndAddFile(String file_path)
-			throws TCException {
+	private TCComponentDataset createDatasetAndAddFile(String file_path) throws TCException
+	{
 		TCComponentDataset ret = null;
 		String dataset_tool = null;
 		String dataset_type = null;
 		dataset_tool = "PDF_Reference";
 		dataset_type = "PDF";
 		TCComponentDatasetType dst = (TCComponentDatasetType) VSP.topBOMLineIR.getSession().getTypeComponent("Dataset");
-		ret = dst.create(gen_dataset_name(), "Ведомость спецификаций", dataset_type);
+		ret = dst.create(gen_dataset_name(), reportFullName, dataset_type);
 		ret.setFiles(new String[] { renamedReportFile!=null?renamedReportFile.getAbsolutePath():vsp.report.report.getAbsolutePath() }, new String[] { dataset_tool });
 		ret.lock();
 		ret.save();
@@ -269,7 +273,8 @@ public class ReportUploader
 		return ret;
 	}
 
-	private String gen_dataset_name() throws TCException {
+	private String gen_dataset_name() throws TCException
+	{
 		String ret = null;
 		if (VSP.topBOMLineIR != null)
 			ret = "Ведомость спецификаций - "
@@ -277,34 +282,67 @@ public class ReportUploader
 		return ret;
 	}
 	
-	private TCComponentDataset deletePrevSpecDatasetOfKd() throws Exception {
+	private TCComponentDataset findExistingDataset()
+	{
+		try{
+			for (AIFComponentContext compContext : VSP.vspIR.getChildren())
+			{
+				if ((compContext.getComponent() instanceof TCComponentDataset) 
+						&& compContext.getComponent().getProperty("object_desc").equals(reportFullName))
+				{
+					return (TCComponentDataset)compContext.getComponent();
+				}
+	
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private void deleteDatasetNamedRefs(TCComponentDataset dataset)
+	{
+		try
+		{
+			dataset.removeFiles("ImanFile");
+		}
+		catch (TCException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private TCComponentDataset deletePrevSpecDatasetOfKd() throws Exception
+	{
 		TCComponentDataset dataset = null;
-		for (AIFComponentContext compContext : VSP.vspIR.getChildren()){
-			System.out.println(">>> TYPE: " + compContext.getComponent().getProperty("object_type"));
+		for (AIFComponentContext compContext : VSP.vspIR.getChildren())
+		{
 			if ((compContext.getComponent() instanceof TCComponentDataset) 
-					&& compContext.getComponent().getProperty("object_desc").equals("Ведомость спецификаций")) {
+					&& compContext.getComponent().getProperty("object_desc").equals(reportFullName))
+			{
 				dataset = (TCComponentDataset)compContext.getComponent();
-				System.out.println("Deleting Spec Dataset Named Ref in KD");
 				dataset.removeFiles("ImanFile");
-				System.out.println("after destroying");
 			}
 
 		}
 		return dataset;
 	}
 	
-	private TCComponentItemRevision getLastRevOfItem(TCComponentItem item) throws TCException {
+	private TCComponentItemRevision getLastRevOfItem(TCComponentItem item) throws TCException
+	{
 		TCComponentItemRevision out = null;
 		Map<Integer, TCComponentItemRevision> mapItemRevByRev = new HashMap<Integer, TCComponentItemRevision>();
 		ArrayList<Integer> revisions = new ArrayList<Integer>();
 		AIFComponentContext[] contextArray = item.getChildren();
-		System.out.println("Children of ITEM: " + contextArray.length);
-		for (int i=0; i<contextArray.length; i++) {
-			System.out.println("~~~~ TYPE: " + contextArray[i].getComponent().getType());
-			if (contextArray[i].getComponent().getType().equals("Oc9_KDRevision")) {
+		for (int i=0; i<contextArray.length; i++)
+		{
+			if (contextArray[i].getComponent().getType().equals("Oc9_KDRevision"))
+			{
 				TCComponentItemRevision currItemRev = (TCComponentItemRevision)contextArray[i].getComponent();
-				if(currItemRev.getProperty("item_id").equals(item.getProperty("item_id"))) {
-					System.out.println("ADDING TO MAP!");
+				if(currItemRev.getProperty("item_id").equals(item.getProperty("item_id")))
+				{
 					Integer rev = Integer.valueOf(currItemRev.getProperty("current_revision_id"));
 					mapItemRevByRev.put(rev, currItemRev);
 					revisions.add(rev);
@@ -314,33 +352,51 @@ public class ReportUploader
 		Collections.sort(revisions);
 		if (revisions.size() > 0) 
 			out = mapItemRevByRev.get(revisions.get(revisions.size()-1)); 
-		
-		System.out.println("returning: " + out.getProperty("item_id"));
+
 		return out;
 	}
 	
-	private static void deleteRelationsToCompanyPart(TCComponentItemRevision rev) throws Exception {
+	private void deleteRelationsToCompanyPart(TCComponentItemRevision rev) throws Exception
+	{
 		ArrayList<TCComponentItemRevision> list4Removing = new ArrayList<TCComponentItemRevision>();
 		AIFComponentContext[] itemRev4Delete = rev.getItem().getRelated("Oc9_DocRel");
-		for (AIFComponentContext currContext : itemRev4Delete) {
+		for (AIFComponentContext currContext : itemRev4Delete)
+		{
 			if (((TCComponentItemRevision)currContext.getComponent()).getProperty("item_id")
-					.equals(rev.getItem().getProperty("item_id") + " ВС")) {
-				System.out.println("~~~ Added to delete");
+					.equals(rev.getItem().getProperty("item_id") + " " + reportShortName))
+			{
 				list4Removing.add((TCComponentItemRevision)currContext.getComponent());
 			}
 		}
 		rev.remove("Oc9_DocRel", list4Removing);
 	}
 	
-	private TCComponentItem findKDDocItem() throws TCException {
+	private void renameReportFile()
+	{
+		try
+		{
+			renamedReportFile = new File(vsp.report.data.getAbsolutePath().substring(0, vsp.report.data.getAbsolutePath().lastIndexOf("_"))+".pdf");
+			Files.deleteIfExists(renamedReportFile.toPath());
+			vsp.report.report.renameTo(renamedReportFile);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+	private TCComponentItem findKDDocItem() throws TCException
+	{
 		TCComponentItem result = null;
 		TCComponentItemType itemType = (TCComponentItemType) VSPHandler.session.getTypeComponent("Oc9_KD");
-		String criteria = VSP.topBOMLineIR.getProperty("item_id") + " ВС";
+		String criteria = VSP.topBOMLineIR.getProperty("item_id") + " " + reportShortName;
 		TCComponentItem[] items = itemType.findItems(criteria);
-		if (items != null && items.length > 0) {
-			for(TCComponentItem item : items){
-				System.out.println("Found item " + item.getProperty("item_id") + " of type " + item.getType());
-				if(item.getType().equals("Oc9_KD")){
+		if (items != null && items.length > 0)
+		{
+			for(TCComponentItem item : items)
+			{
+				if(item.getType().equals("Oc9_KD"))
+				{
 					result = item;
 					break;
 				}
